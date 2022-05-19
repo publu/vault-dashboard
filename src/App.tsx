@@ -36,23 +36,59 @@ const contractMetas: ContractMeta[] | undefined = Contracts[chainId]
 const VaultList: React.FC = () => {
     return (<List>
         <Datagrid>
-            <TextField source="tokenName" />
-            <TextField source="vaultIdx" />
-            <TextField source="owner" />
-            <TextField source="collateral" />
-            <TextField source="debt" />
-            <TextField source="cdr" />
+            <TextField source="tokenName"/>
+            <TextField source="vaultIdx"/>
+            <TextField source="owner"/>
+            <TextField source="collateral"/>
+            <TextField source="debt"/>
+            <TextField source="cdr"/>
         </Datagrid>
     </List>)
 }
 
-const DataDisplay: React.FC<{vaultData: {vaults: VaultInfo[][]}}> = ({vaultData} ) => {
-    const currentVaultData = vaultData.vaults[0]
-    const dataProvider = fakeDataProvider(currentVaultData? {vaults:currentVaultData}: {vaults:[]})
+
+const store = localStorageStore();
+
+const DataDisplay: React.FC= () => {
+    const [dataProvider, setDataProvider] = useState<DataProvider>();
+    useLayoutEffect(() => {
+        console.log("called useEffect")
+        const effect = async () => {
+            try {
+                await init()
+
+                console.log("called effect")
+
+                console.log({contractMetas})
+                const vaultInfoPromises = contractMetas?.map((contractMeta) => {
+                    return fetchVaultInfo(chainId, contractMeta.address, contractMeta.abi)
+                })
+                console.log({vaultInfoPromises})
+
+                if (vaultInfoPromises) {
+                    const dataProvider = fakeDataProvider([]);
+                    const vaults = await vaultInfoPromises[0]
+                    vaults.map(v => {
+                        dataProvider.create('vaults', {data:v})
+                    })
+                    setDataProvider(dataProvider)
+                }
+            } catch (e: any) {
+                console.error(e)
+            } finally {
+                console.log("finished")
+            }
+        }
+
+        void effect()
+    }, [])
+
     return (
-        <Admin dataProvider={dataProvider}>
-            <Resource name={"vaults"} list={ListGuesser}/>
-        </Admin>
+        <AdminContext dataProvider={dataProvider} i18nProvider={defaultI18nProvider} store={store}>
+            <AdminUI>
+                <Resource name={'vaults'} list={VaultList}/>
+            </AdminUI>
+        </AdminContext>
     );
 }
 
@@ -60,5 +96,6 @@ const App = () => {
 
     return <DataDisplay/>;
 };
+
 
 export default App;
