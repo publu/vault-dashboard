@@ -1,11 +1,35 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import './App.css';
-import {Admin, ListGuesser, Resource, List, Datagrid, TextField} from 'react-admin';
+import {
+    Admin,
+    AdminContext,
+    AdminUI,
+    Datagrid,
+    DataProvider,
+    defaultI18nProvider,
+    defaultTheme,
+    LegacyDataProvider,
+    List,
+    ListGuesser,
+    localStorageStore,
+    Resource,
+    TextField,
+    useDataProvider,
+    useNotify, useRefresh,
+} from 'react-admin';
 import fakeDataProvider from 'ra-data-fakerest'
 import {ChainId} from "./constants";
 import {ContractMeta, Contracts} from "./ContractMetas";
-import { init } from './multicall'
-import {fetchVaultInfo, VaultInfo} from "./vaultInfo";
+import {init} from './multicall'
+import {fetchVaultInfo} from "./vaultInfo";
+import localStorageDataProvider from 'ra-data-local-storage';
+
+const theme = {
+    ...defaultTheme,
+    palette: {
+        type: 'dark', // Switching the dark mode on is a single property value change.
+    },
+};
 const chainId = ChainId.MATIC
 const contractMetas: ContractMeta[] | undefined = Contracts[chainId]
 
@@ -34,26 +58,7 @@ const DataDisplay: React.FC<{vaultData: {vaults: VaultInfo[][]}}> = ({vaultData}
 
 const App = () => {
 
-    const [vaultData, setVaultData] = useState<{vaults: VaultInfo[][]}>({vaults: []});
-    useEffect(() => {
-        console.log("called useEffect")
-        const effect = async () => {
-            console.log("called effect")
-            await init()
-            const vaultInfoPromises = contractMetas?.slice(1).map((contractMeta) => {
-                return fetchVaultInfo(chainId, contractMeta.address, contractMeta.abi)
-            })
-            if (vaultInfoPromises) {
-                const vaults = await vaultInfoPromises[0] //Promise.all(vaultInfoPromises)
-                setVaultData({vaults: [vaults]})
-            }
-
-        }
-        void effect().then(() => {
-            console.log("called")
-        })
-    }, [])
-    return <DataDisplay vaultData={vaultData}/>;
+    return <DataDisplay/>;
 };
 
 export default App;
