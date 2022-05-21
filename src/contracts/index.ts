@@ -2,10 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ERC20 } from "./ERC20";
+export type { CrosschainNativeQiStablecoin } from "./CrosschainNativeQiStablecoin";
 export type { CrosschainQiStablecoin } from "./CrosschainQiStablecoin";
 export type { CrosschainQiStablecoinSlim } from "./CrosschainQiStablecoinSlim";
 export type { Erc20QiStablecoin } from "./Erc20QiStablecoin";
 export * as factories from "./factories";
+export { CrosschainNativeQiStablecoin__factory } from "./factories/CrosschainNativeQiStablecoin__factory";
 export { CrosschainQiStablecoin__factory } from "./factories/CrosschainQiStablecoin__factory";
 export { CrosschainQiStablecoinSlim__factory } from "./factories/CrosschainQiStablecoinSlim__factory";
 export { ERC20__factory } from "./factories/ERC20__factory";

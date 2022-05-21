@@ -1,6 +1,11 @@
 import { JsonFragment } from '@ethersproject/abi'
 import { ChainId, ChainIdKey } from './constants'
-import { CrosschainQiStablecoin__factory, CrosschainQiStablecoinSlim__factory, Erc20QiStablecoin__factory } from './contracts'
+import {
+    CrosschainNativeQiStablecoin__factory,
+    CrosschainQiStablecoin__factory,
+    CrosschainQiStablecoinSlim__factory,
+    Erc20QiStablecoin__factory
+} from './contracts'
 
 export interface ContractMeta {
     address: string
@@ -37,8 +42,8 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
         // { label: 'WMATIC', address: '0x305f113ff78255d4f8524c8f50c7300b91b10f6a', abi: CrosschainQiStablecoinSlim__factory.abi },
         // { label: 'SAND', address: '0x305f113ff78255d4f8524c8f50c7300b91b10f6a', abi: Erc20QiStablecoin__factory.abi },
     ],
-    // [ChainId.FANTOM]: [
-    //     { label: 'WFTM', address: '0x1066b8FC999c1eE94241344818486D5f944331A0', abi: Erc20QiStablecoin__factory.abi },
+    [ChainId.FANTOM]: [
+        { label: 'WFTM', address: '0x1066b8FC999c1eE94241344818486D5f944331A0', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'WETH', address: '0xD939c268C49c442F037E968F045ba02f499562D4', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'yvWFTM', address: '0x7efB260662a6FA95c1CE1092c53Ca23733202798', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'yvDAI', address: '0x682E473FcA490B0adFA7EfE94083C1E63f28F034', abi: Erc20QiStablecoin__factory.abi },
@@ -57,7 +62,7 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     //     { label: 'mooBooBTC-FTM', address: '0xf34e271312e41bbd7c451b76af2af8339d6f16ed', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'mooBooETH-FTM', address: '0x9ba01b1279b1f7152b42aca69faf756029a9abde', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'mooBIFI', address: '0x75d4ab6843593c111eeb02ff07055009c836a1ef', abi: Erc20QiStablecoin__factory.abi },
-    // ],
+    ],
     // [ChainId.AVALANCHE]: [
     //     { label: 'mooAaveAVAX', address: '0xfA19c1d104F4AEfb8d5564f02B3AdCa1b515da58', abi: Erc20QiStablecoin__factory.abi },
     //     { label: 'Stake DAO USD Strategy Vault', address: '0x13a7fe3ab741ea6301db8b164290be711f546a73', abi: Erc20QiStablecoin__factory.abi },

@@ -34,7 +34,7 @@ const chainId = ChainId.MATIC
 const contractMetas: ContractMeta[] | undefined = Contracts[chainId]
 
 const VaultList: React.FC = () => {
-    return (<List>
+    return (<List queryOptions={{ refetchInterval: 1000 }}>
         <Datagrid>
             <TextField source="tokenName"/>
             <TextField source="vaultIdx"/>
@@ -67,9 +67,9 @@ const DataDisplay: React.FC= () => {
 
                 if (vaultInfoPromises) {
                     const dataProvider = fakeDataProvider([]);
-                    const vaults = await vaultInfoPromises[0]
-                    vaults.map(v => {
-                        dataProvider.create('vaults', {data:v})
+                    const vaults = await Promise.all(vaultInfoPromises)
+                    vaults.flat().map(v => {
+                        return dataProvider.create('vaults', {data:v})
                     })
                     setDataProvider(dataProvider)
                 }
