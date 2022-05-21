@@ -30,8 +30,6 @@ const theme = {
         type: 'dark', // Switching the dark mode on is a single property value change.
     },
 };
-const chainId = ChainId.MATIC
-const contractMetas: ContractMeta[] | undefined = Contracts[chainId]
 
 const VaultList: React.FC = () => {
     return (<List queryOptions={{ refetchInterval: 1000 }}>
@@ -59,11 +57,12 @@ const DataDisplay: React.FC= () => {
 
                 console.log("called effect")
 
-                console.log({contractMetas})
-                const vaultInfoPromises = contractMetas?.map((contractMeta) => {
-                    return fetchVaultInfo(chainId, contractMeta.address, contractMeta.abi)
-                })
-                console.log({vaultInfoPromises})
+                const chainIds = [ChainId.MATIC, ChainId.FANTOM]
+                const vaultInfoPromises = chainIds
+                    .flatMap(cId => Contracts[cId]?.flatMap((contractMeta) => {
+                        console.log({cId, contractMeta})
+                        return fetchVaultInfo(cId, contractMeta.address, contractMeta.abi)
+                    }))
 
                 if (vaultInfoPromises) {
                     const dataProvider = fakeDataProvider([]);
