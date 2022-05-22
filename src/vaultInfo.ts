@@ -1,10 +1,10 @@
-import { JsonFragment } from '@ethersproject/abi'
-import { JsonRpcProvider } from '@ethersproject/providers'
-import { Contract } from 'ethers-multicall'
+import {JsonFragment} from '@ethersproject/abi'
+import {JsonRpcProvider} from '@ethersproject/providers'
+import {Contract} from 'ethers-multicall'
 import _ from 'lodash'
-import { ChainIdKey, RPCS } from './constants'
-import { ERC20__factory } from './contracts'
-import {init, multicall} from './multicall'
+import {ChainIdKey, RPCS} from './constants'
+import {ERC20__factory} from './contracts'
+import {multicall} from './multicall'
 
 export interface VaultInfo {
     owner: string;
@@ -34,7 +34,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
 
     const collateralERC20 = ERC20__factory.connect(collateralAddress, ethersProvider)
     const tokenName = await collateralERC20.symbol()
-    const tokenDecimals = await collateralERC20.decimals()
+    // const tokenDecimals = await collateralERC20.decimals()
     const limitToFetch = totalSupply
     const existsCalls = _.range(limitToFetch).map((i) => vaultContract.exists(i))
 
@@ -55,7 +55,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     for (let i = 0; i < vaultsToFetch.length; i++) {
         const vaultIdx = vaultsToFetch[i]
         const owner = owners[i]
-        const collateral = collateralAmounts[i] as unknown as number / tokenDecimals
+        const collateral = collateralAmounts[i] as unknown as number / 1e18
         const debt = debtAmounts[i] as unknown as number / 1e18
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr

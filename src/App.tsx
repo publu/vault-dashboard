@@ -1,93 +1,83 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useLayoutEffect} from 'react';
 import './App.css';
-import {
-    Admin,
-    AdminContext,
-    AdminUI,
-    Datagrid,
-    DataProvider,
-    defaultI18nProvider,
-    defaultTheme,
-    LegacyDataProvider,
-    List,
-    ListGuesser,
-    localStorageStore,
-    Resource,
-    TextField,
-    useDataProvider,
-    useNotify, useRefresh,
-} from 'react-admin';
+import {Admin, Datagrid, defaultTheme, List, NumberField, RaThemeOptions, Resource, TextField,} from 'react-admin';
 import fakeDataProvider from 'ra-data-fakerest'
 import {ChainId} from "./constants";
-import {ContractMeta, Contracts} from "./ContractMetas";
+import {Contracts} from "./ContractMetas";
 import {init} from './multicall'
 import {fetchVaultInfo} from "./vaultInfo";
-import localStorageDataProvider from 'ra-data-local-storage';
 
 const theme = {
     ...defaultTheme,
     palette: {
-        type: 'dark', // Switching the dark mode on is a single property value change.
+        type: 'dark',
     },
 };
 
 const VaultList: React.FC = () => {
-    return (<List queryOptions={{ refetchInterval: 1000 }}>
+    return (<List queryOptions={{refetchInterval: 1000}}>
         <Datagrid>
             <TextField source="tokenName"/>
-            <TextField source="vaultIdx"/>
+            <NumberField source="vaultIdx"/>
             <TextField source="owner"/>
-            <TextField source="collateral"/>
-            <TextField source="debt"/>
-            <TextField source="cdr"/>
+            <NumberField source="collateral" options={{style: 'decimal'}}/>
+            <NumberField source="debt" options={{ style: 'currency', currency: 'USD' }}/>
+            <NumberField source="cdr" options={{style: 'percent'}}/>
         </Datagrid>
     </List>)
 }
 
-
-const store = localStorageStore();
-
-const DataDisplay: React.FC= () => {
-    const [dataProvider, setDataProvider] = useState<DataProvider>();
+const DataDisplay: React.FC = () => {
+    const dataProvider = fakeDataProvider({vaults:[]});
     useLayoutEffect(() => {
         console.log("called useEffect")
         const effect = async () => {
-            try {
-                await init()
+            await init()
 
-                console.log("called effect")
+            console.log("called effect")
 
-                const chainIds = [ChainId.MATIC, ChainId.FANTOM]
-                const vaultInfoPromises = chainIds
-                    .flatMap(cId => Contracts[cId]?.flatMap((contractMeta) => {
-                        console.log({cId, contractMeta})
-                        return fetchVaultInfo(cId, contractMeta.address, contractMeta.abi)
-                    }))
-
-                if (vaultInfoPromises) {
-                    const dataProvider = fakeDataProvider([]);
-                    const vaults = await Promise.all(vaultInfoPromises)
-                    vaults.flat().map(v => {
-                        return dataProvider.create('vaults', {data:v})
+            const chainIds = [
+                ChainId.MATIC, ChainId.FANTOM,
+                ChainId.AVALANCHE, ChainId.ARBITRUM, ChainId.MOONRIVER,
+                ChainId.HARMONY, ChainId.XDAI, ChainId.OPTIMISM, ChainId.BSC
+            ]
+            const vaultInfoPromises = chainIds.flatMap((chainId) => {
+                const contracts = Contracts[chainId];
+                if (contracts)
+                    return contracts.map(c => {
+                        return {...c, chainId}
                     })
-                    setDataProvider(dataProvider)
+                else
+                    return []
+            }).flatMap(async (contractMeta) => {
+                if (contractMeta){
+                    try {
+                        console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
+                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi)
+                        vaults.forEach(v => {
+                            dataProvider.create('vaults', {data: v})
+                        })
+                        console.info(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
+
+                    } catch (e: any) {
+                        console.error(`Error fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
+                    }
                 }
-            } catch (e: any) {
-                console.error(e)
-            } finally {
-                console.log("finished")
+            })
+
+            if (vaultInfoPromises) {
+                await Promise.all(vaultInfoPromises)
+                console.info("Finished")
             }
         }
 
         void effect()
-    }, [])
+    }, [dataProvider])
 
     return (
-        <AdminContext dataProvider={dataProvider} i18nProvider={defaultI18nProvider} store={store}>
-            <AdminUI>
-                <Resource name={'vaults'} list={VaultList}/>
-            </AdminUI>
-        </AdminContext>
+        <Admin dataProvider={dataProvider} theme={theme as RaThemeOptions}>
+            <Resource name={'vaults'} list={VaultList}/>
+        </Admin>
     );
 }
 
