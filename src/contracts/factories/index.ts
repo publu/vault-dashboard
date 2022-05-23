@@ -7,4 +7,5 @@ export { CrosschainQiStablecoin__factory } from "./CrosschainQiStablecoin__facto
 export { CrosschainQiStablecoinSlim__factory } from "./CrosschainQiStablecoinSlim__factory";
 export { CrosschainQiStablecoinSlimV2__factory } from "./CrosschainQiStablecoinSlimV2__factory";
 export { CrosschainQiStablecoinV2__factory } from "./CrosschainQiStablecoinV2__factory";
+export { CrosschainQiStablecoinwbtc__factory } from "./CrosschainQiStablecoinwbtc__factory";
 export { Erc20QiStablecoin__factory } from "./Erc20QiStablecoin__factory";

@@ -3,7 +3,10 @@ import { ChainId, ChainIdKey } from './constants'
 import {
     CrosschainNativeQiStablecoin__factory,
     CrosschainQiStablecoin__factory,
-    CrosschainQiStablecoinSlim__factory, CrosschainQiStablecoinSlimV2__factory, CrosschainQiStablecoinV2__factory,
+    CrosschainQiStablecoinSlim__factory,
+    CrosschainQiStablecoinSlimV2__factory,
+    CrosschainQiStablecoinV2__factory,
+    CrosschainQiStablecoinwbtc__factory,
     Erc20QiStablecoin__factory
 } from './contracts'
 
@@ -12,6 +15,7 @@ export interface ContractMeta {
     abi: JsonFragment[]
     label: string
 }
+// TODO Fix error fetching MOVR on 1285, camWMATIC on 137. Fix intermittent double fetching vaults
 
 export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.MATIC]: [
@@ -41,23 +45,23 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.FANTOM]: [
         { label: 'WFTM', address: '0x1066b8FC999c1eE94241344818486D5f944331A0', abi: Erc20QiStablecoin__factory.abi },
         { label: 'WETH', address: '0xD939c268C49c442F037E968F045ba02f499562D4', abi: CrosschainQiStablecoin__factory.abi },
-        { label: 'yvWFTM', address: '0x7efB260662a6FA95c1CE1092c53Ca23733202798', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'yvDAI', address: '0x682E473FcA490B0adFA7EfE94083C1E63f28F034', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'yvWFTM', address: '0x7efB260662a6FA95c1CE1092c53Ca23733202798', abi: CrosschainQiStablecoin__factory.abi },
+        { label: 'yvDAI', address: '0x682E473FcA490B0adFA7EfE94083C1E63f28F034', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'yvETH', address: '0x7aE52477783c4E3e5c1476Bbb29A8D029c920676', abi: Erc20QiStablecoin__factory.abi },
         { label: 'yvBTC', address: '0x571F42886C31f9b769ad243e81D06D0D144BE7B4', abi: Erc20QiStablecoin__factory.abi },
         { label: 'yvYFI', address: '0x6d6029557a06961aCC5F81e1ffF5A474C54e32Fd', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'BTC', address: '0xE5996a2cB60eA57F03bf332b5ADC517035d8d094', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'LINK', address: '0xd6488d586E8Fcd53220e4804D767F19F5C846086', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'BTC', address: '0xE5996a2cB60eA57F03bf332b5ADC517035d8d094', abi: CrosschainQiStablecoinwbtc__factory.abi },
+        { label: 'LINK', address: '0xd6488d586E8Fcd53220e4804D767F19F5C846086', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'SUSHI', address: '0x267bDD1C19C932CE03c7A62BBe5b95375F9160A6', abi: Erc20QiStablecoin__factory.abi },
         { label: 'AAVE', address: '0xdB09908b82499CAdb9E6108444D5042f81569bD9', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'mooScreamFTM', address: '0x3609A304c6A41d87E895b9c1fd18c02ba989Ba90', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'mooScreamFTM', address: '0x3609A304c6A41d87E895b9c1fd18c02ba989Ba90', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'mooScreamETH', address: '0xC1c7eF18ABC94013F6c58C6CdF9e829A48075b4e', abi: Erc20QiStablecoin__factory.abi },
         {label: 'mooScreamBTC', address: '0x5563Cc1ee23c4b17C861418cFF16641D46E12436', abi: Erc20QiStablecoin__factory.abi,},
         { label: 'mooScreamLINK', address: '0x8e5e4D08485673770Ab372c05f95081BE0636Fa2', abi: CrosschainQiStablecoin__factory.abi },
-        { label: 'mooScreamDAI', address: '0xBf0ff8ac03f3E0DD7d8faA9b571ebA999a854146', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'mooScreamDAI', address: '0xBf0ff8ac03f3E0DD7d8faA9b571ebA999a854146', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'mooBooBTC-FTM', address: '0xf34e271312e41bbd7c451b76af2af8339d6f16ed', abi: Erc20QiStablecoin__factory.abi },
         { label: 'mooBooETH-FTM', address: '0x9ba01b1279b1f7152b42aca69faf756029a9abde', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'mooBIFI', address: '0x75d4ab6843593c111eeb02ff07055009c836a1ef', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'mooBIFI', address: '0x75d4ab6843593c111eeb02ff07055009c836a1ef', abi: CrosschainQiStablecoin__factory.abi },
     ],
     [ChainId.AVALANCHE]: [
         { label: 'mooAaveAVAX', address: '0xfA19c1d104F4AEfb8d5564f02B3AdCa1b515da58', abi: CrosschainQiStablecoin__factory.abi },
