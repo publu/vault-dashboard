@@ -4,12 +4,13 @@ import {init} from "../multicall";
 import {ChainId} from "../constants";
 import {Contracts} from "../ContractMetas";
 import {fetchVaultInfo} from "../vaultInfo";
-import {Admin, Resource} from "react-admin";
+import {Admin, Resource, useNotify } from "react-admin";
 import {theme} from "../theme";
 import VaultList from "./VaultList";
 
 const DataDisplay: React.FC = () => {
     const dataProvider = fakeDataProvider({vaults:[]});
+    const notify = useNotify()
     useLayoutEffect(() => {
         const effect = async () => {
             await init()
@@ -35,10 +36,12 @@ const DataDisplay: React.FC = () => {
                         vaults.forEach(v => {
                             dataProvider.create('vaults', {data: v})
                         })
+                        notify(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
                         console.info(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
 
                     } catch (e: any) {
                         console.error(`Error fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
+                        notify(`Error fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
                     }
                 }
             })
@@ -50,7 +53,7 @@ const DataDisplay: React.FC = () => {
         }
 
         void effect()
-    }, [dataProvider])
+    }, [dataProvider, notify])
 
     return (
         <Admin dataProvider={dataProvider} theme={theme}>
