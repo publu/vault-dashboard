@@ -32,7 +32,7 @@ const DataDisplay: React.FC = () => {
                 if (contractMeta){
                     try {
                         console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
-                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi)
+                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals)
                         vaults.forEach(v => {
                             dataProvider.create('vaults', {data: v})
                         })

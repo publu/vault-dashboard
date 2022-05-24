@@ -1,6 +1,5 @@
 import { ChainId } from './constants.js'
 import { ContractMeta, Contracts } from './ContractMetas.js'
-import { init } from './multicall.js'
 import { fetchVaultInfo } from './vaultInfo.js'
 
 const chainId = ChainId.MATIC

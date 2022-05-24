@@ -15,7 +15,7 @@ export interface VaultInfo {
     vaultIdx: number
 }
 
-export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[]) {
+export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
     const ethersProvider = new JsonRpcProvider(RPCS[chainId])
     const vaultContract = new Contract(contractAddress, abi)
 
@@ -55,7 +55,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     for (let i = 0; i < vaultsToFetch.length; i++) {
         const vaultIdx = vaultsToFetch[i]
         const owner = owners[i]
-        const collateral = collateralAmounts[i] as unknown as number / 1e18
+        const collateral = collateralAmounts[i] as unknown as number / decimals
         const debt = debtAmounts[i] as unknown as number / 1e18
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
