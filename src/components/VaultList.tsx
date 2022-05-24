@@ -1,9 +1,10 @@
 import React from "react";
 import {Datagrid, List, NumberField, TextField} from "react-admin";
 import LoadingDisplay from "./LoadingDisplay";
+import searchFilters from "./Search";
 
 const VaultList: React.FC = () => {
-    return (<List empty={<LoadingDisplay/>} queryOptions={{refetchInterval: 1000}}>
+    return (<List empty={<LoadingDisplay/>} queryOptions={{refetchInterval: 1000}} filters={searchFilters}>
         <Datagrid>
             <TextField source="tokenName"/>
             <NumberField source="vaultIdx"/>

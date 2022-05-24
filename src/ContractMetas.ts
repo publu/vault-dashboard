@@ -1,7 +1,6 @@
 import { JsonFragment } from '@ethersproject/abi'
 import { ChainId, ChainIdKey } from './constants'
 import {
-    CrosschainNativeQiStablecoin__factory,
     CrosschainQiStablecoin__factory,
     CrosschainQiStablecoinSlim__factory,
     CrosschainQiStablecoinSlimV2__factory,
@@ -16,7 +15,7 @@ export interface ContractMeta {
     label: string
     decimals?: number
 }
-// TODO Fix error fetching MOVR on 1285, camWMATIC on 137. Fix intermittent double fetching vaults
+// TODO Fix intermittent double fetching vaults
 
 export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.MATIC]: [
@@ -78,7 +77,7 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.MOONRIVER]: [
         { label: 'ETH', address: '0x4a0474E3262d4DB3306Cea4F207B5d66eC8E0AA9', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'ETH-USDC LP', address: '0x97D811A7eb99Ef4Cb027ad59800cE27E68Ee1109', abi: CrosschainQiStablecoin__factory.abi },
-        { label: 'MOVR', address: '0x5db6617ddf077d76cfd9d7fc0fa91aaabc3da683', abi: CrosschainNativeQiStablecoin__factory.abi },
+        { label: 'MOVR', address: '0x5db6617ddf077d76cfd9d7fc0fa91aaabc3da683', abi: CrosschainQiStablecoin__factory.abi },
     ],
     [ChainId.HARMONY]: [
         { label: 'WETH', address: '0x46469f995A5CB60708200C25EaD3cF1667Ed36d6', abi: CrosschainQiStablecoin__factory.abi }, //Guessed abi
