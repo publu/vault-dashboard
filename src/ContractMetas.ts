@@ -21,7 +21,7 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.MATIC]: [
         { label: 'AAVE', address: '0x87ee36f780ae843A78D5735867bc1c13792b7b11', abi: Erc20QiStablecoin__factory.abi },
         { label: 'BAL', address: '0x701A1824e5574B0b6b1c8dA808B184a7AB7A2867', abi: Erc20QiStablecoin__factory.abi },
-        { label: 'CEL', address: '0x178f1c95c85fe7221c7a6a3d6f12b7da3253eeae', abi: Erc20QiStablecoin__factory.abi },
+        { label: 'CEL', address: '0x178f1c95c85fe7221c7a6a3d6f12b7da3253eeae', abi: Erc20QiStablecoin__factory.abi, decimals: 1e4 },
         { label: 'CRV', address: '0x98B5F32dd9670191568b661a3e847Ed764943875', abi: Erc20QiStablecoin__factory.abi },
         { label: 'FXS', address: '0xff2c44fb819757225a176e825255a01b3b8bb051', abi: CrosschainQiStablecoin__factory.abi },
         { label: 'GHST', address: '0xF086dEdf6a89e7B16145b03a6CB0C0a9979F1433', abi: Erc20QiStablecoin__factory.abi },
