@@ -8,6 +8,8 @@ import {Admin, Resource, useNotify } from "react-admin";
 import {theme} from "../theme";
 import VaultList from "./VaultList";
 
+let addedVaults = new Set()
+
 const DataDisplay: React.FC = () => {
     const dataProvider = fakeDataProvider({vaults:[]});
     const notify = useNotify()
@@ -34,7 +36,13 @@ const DataDisplay: React.FC = () => {
                         console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
                         const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals)
                         vaults.forEach(v => {
-                            dataProvider.create('vaults', {data: v})
+                            if (addedVaults.has(JSON.stringify(v))){
+                                console.log("duplicate vault")
+                            } else {
+                                dataProvider.create('vaults', {data: v})
+                                addedVaults.add(JSON.stringify(v))
+                            }
+
                         })
                         notify(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
                         console.info(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
@@ -53,6 +61,7 @@ const DataDisplay: React.FC = () => {
         }
 
         void effect()
+
     }, [dataProvider, notify])
 
     return (
