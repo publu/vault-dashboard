@@ -15,3 +15,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+button {
+  color: #90caf9;
+  background-color: transparent;
+  border: 0;
+  border-radius: 4px;
+  margin: .5rem;
+  padding: .5rem;
+}
+
+button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}

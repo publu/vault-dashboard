@@ -13,6 +13,7 @@ export interface VaultInfo {
     collateral: number;
     debt: number;
     vaultIdx: number
+    contract: Contract
 }
 
 export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
@@ -57,9 +58,10 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
         const owner = owners[i]
         const collateral = collateralAmounts[i] as unknown as number / decimals
         const debt = debtAmounts[i] as unknown as number / 1e18
+        const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract })
     }
     return vaultInfo
 }
