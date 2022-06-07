@@ -3,7 +3,7 @@ import {Button, useRecordContext} from "react-admin";
 import {useAccount, useChainId, useIsActive, useProvider} from "../Connectors/Metamask";
 import {addOrSwapChain} from "../utils/utils";
 import {ChainKey} from "../Connectors/Chains";
-import {CrosschainQiStablecoin} from "../contracts";
+import {CrosschainQiStablecoin__factory} from "../contracts";
 
 const LiquidateButton:React.FC = () => {
     const record = useRecordContext();
@@ -15,22 +15,20 @@ const LiquidateButton:React.FC = () => {
     return <Button
         label="Liquidate"
         onClick={ async () => {
-        const vaultContract = record.contract as CrosschainQiStablecoin;
+        const vaultContract = record.contract;
         const vaultId = record.vaultIdx;
         const vaultChainId = record.chainId;
-        console.log(vaultContract);
-        console.log(vaultId);
-        console.log(vaultChainId);
             if (metaMaskIsActive && chainId && metamaskProvider) {
                 if (account && !(chainId === vaultChainId)) {
                     await addOrSwapChain(metamaskProvider, account, vaultChainId as ChainKey)
                 }
-                let signerContract = vaultContract?.connect(metamaskProvider.getSigner())
+                let stablecoin = CrosschainQiStablecoin__factory.connect(vaultContract.address, metamaskProvider)
+                let signerContract = stablecoin?.connect(metamaskProvider.getSigner())
                 if(signerContract && chainId === vaultChainId) {
                     const tx = await signerContract.liquidateVault(vaultId)
                     await tx.wait(1)
                 } else {
-                    alert("Error: Chain Mismatch")
+                    alert("Make sure you're on the right chain and try again.")
                 }
             } else {
                 alert("Cannot connect to network")
