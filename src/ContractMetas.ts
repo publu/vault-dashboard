@@ -15,7 +15,6 @@ export interface ContractMeta {
     label: string
     decimals?: number
 }
-// TODO Fix intermittent double fetching vaults
 
 export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.MATIC]: [
