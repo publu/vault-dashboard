@@ -2,7 +2,7 @@ import {JsonFragment} from '@ethersproject/abi'
 import {JsonRpcProvider} from '@ethersproject/providers'
 import {Contract} from 'ethers-multicall'
 import _ from 'lodash'
-import {ChainIdKey, RPCS} from './constants'
+import {ChainIdKey, RPCS, ChainName} from './constants'
 import {ERC20__factory} from './contracts'
 import {multicall} from './multicall'
 
@@ -15,6 +15,7 @@ export interface VaultInfo {
     vaultIdx: number
     contract: Contract
     chainId: ChainIdKey
+    vaultChainName: string
 }
 
 export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
@@ -49,6 +50,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     const debtAmounts = await multicall(chainId, debtCalls)
     const ownerCalls = vaultsToFetch.map(i => vaultContract.ownerOf(i))
     const owners = await multicall(chainId, ownerCalls)
+    const vaultChainName = ChainName[chainId]
 
     // let x = Erc20QiStablecoin__factory.connect(contractAddress, ethersProvider)
 
@@ -62,7 +64,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
         const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName })
     }
     return vaultInfo
 }

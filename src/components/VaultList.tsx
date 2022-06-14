@@ -19,6 +19,7 @@ const VaultList: React.FC = () => {
     return (<List actions={<ListActions/>} perPage={100} pagination={<DashPagination />} empty={<LoadingDisplay/>}
                   queryOptions={{refetchInterval: 1000}} filters={searchFilters}>
         <Datagrid>
+            <TextField source="vaultChainName"/>
             <TextField source="tokenName"/>
             <NumberField source="vaultIdx"/>
             <TextField source="owner"/>

@@ -27,6 +27,32 @@ export const ChainId = {
     OPTIMISM: 10,
 } as const
 
+export const ChainName = {
+    1: "MAINNET",
+    3: "ROPSTEN",
+    4: "RINKEBY",
+    5: "GÖRLI",
+    42: "KOVAN",
+    137:  "MATIC",
+    80001: "MATIC_TESTNET",
+    250: "FANTOM",
+    4002: "FANTOM_TESTNET",
+    100: "XDAI",
+    56: "BSC",
+    97: "BSC_TESTNET",
+    42161: "ARBITRUM",
+    1287: "MOONBASE",
+    43114: "AVALANCHE",
+    43113: "FUJI",
+    128: "HECO",
+    256: "HECO_TESTNET",
+    1666600000: "HARMONY",
+    1666700000: "HARMONY_TESTNET",
+    1285: "MOONRIVER",
+    25: "CRONOS",
+    10: "OPTIMISM",
+} as const
+
 export type ChainIdKey = typeof ChainId[keyof typeof ChainId]
 
 export const MULTICALL_NETWORKS: { [chainId in ChainIdKey]: string } = {

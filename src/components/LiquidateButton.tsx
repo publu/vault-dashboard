@@ -24,7 +24,7 @@ const LiquidateButton:React.FC = () => {
                 }
                 let stablecoin = CrosschainQiStablecoin__factory.connect(vaultContract.address, metamaskProvider)
                 let signerContract = stablecoin?.connect(metamaskProvider.getSigner())
-                if(signerContract && chainId === vaultChainId) {
+                if(signerContract && (chainId === vaultChainId)) {
                     const tx = await signerContract.liquidateVault(vaultId)
                     await tx.wait(1)
                 } else {
