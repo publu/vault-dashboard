@@ -3,7 +3,14 @@ import {Button, useRecordContext} from "react-admin";
 import {useAccount, useChainId, useIsActive, useProvider} from "../Connectors/Metamask";
 import {addOrSwapChain} from "../utils/utils";
 import {ChainKey} from "../Connectors/Chains";
-import {CrosschainQiStablecoin__factory} from "../contracts";
+import {
+    CrosschainQiStablecoin,
+    CrosschainQiStablecoin__factory,
+    QiStablecoin,
+    QiStablecoin__factory
+} from "../contracts";
+import {ethers} from "ethers";
+import {maiAddresses} from "../constants";
 
 const LiquidateButton:React.FC = () => {
     const record = useRecordContext();
@@ -18,15 +25,32 @@ const LiquidateButton:React.FC = () => {
         const vaultContract = record.contract;
         const vaultId = record.vaultIdx;
         const vaultChainId = record.chainId;
-            if (metaMaskIsActive && chainId && metamaskProvider) {
+        const vaultChainName = record.vaultChainName;
+        const vaultDebt = record.debt;
+
+            if (metaMaskIsActive && chainId && metamaskProvider && account) {
                 if (account && !(chainId === vaultChainId)) {
                     await addOrSwapChain(metamaskProvider, account, vaultChainId as ChainKey)
                 }
-                let stablecoin = CrosschainQiStablecoin__factory.connect(vaultContract.address, metamaskProvider)
-                let signerContract = stablecoin?.connect(metamaskProvider.getSigner())
-                if(signerContract && (chainId === vaultChainId)) {
-                    const tx = await signerContract.liquidateVault(vaultId)
-                    await tx.wait(1)
+                console.log(maiAddresses[vaultChainName])
+                console.log(vaultChainName)
+                let maiContract = QiStablecoin__factory.connect(maiAddresses[vaultChainName], metamaskProvider)
+                // let maiBalance = maiContract.balanceOf(account)
+                let signerContract: QiStablecoin | CrosschainQiStablecoin = maiContract?.connect(metamaskProvider.getSigner())
+                if(account && signerContract && (chainId === vaultChainId)) {
+                    let allowance = await signerContract.allowance(account, vaultContract.address)
+                    console.log(allowance)
+                    console.log(vaultDebt)
+                    if (allowance < vaultDebt) {
+                        console.log("approval call")
+                        let approval = await signerContract.approve(vaultContract.address, ethers.constants.MaxUint256)
+                    } else {
+                        let stablecoin = CrosschainQiStablecoin__factory.connect(vaultContract.address, metamaskProvider)
+                        signerContract = stablecoin?.connect(metamaskProvider.getSigner())
+                        let tx = await signerContract.liquidateVault(vaultId)
+                        await tx.wait(1)
+                    }
+
                 } else {
                     alert("Make sure you're on the right chain and try again.")
                 }
