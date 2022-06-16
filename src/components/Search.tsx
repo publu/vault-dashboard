@@ -8,14 +8,14 @@ interface filterProps {
     defaultValue: number | boolean
 }
 
-const QuickFilter: React.FC<filterProps> = ({label, source, defaultValue}) => {
+const QuickFilter: React.FC<filterProps> = ({label}) => {
     const translate = useTranslate();
     return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
 };
 const searchFilters = [
     <TextInput label="Search" source="q" alwaysOn />,
     <QuickFilter label="Has Collateral" source="collateral_gt" defaultValue={0} />,
-    <QuickFilter label="No Debt" source="debt" defaultValue={0} />,
+    <QuickFilter label="Has Debt" source="debt_gt" defaultValue={0} />,
     // <QuickFilter label="Under-collateralized" source="cdr_lte" defaultValue={110}/>
 ];
 
