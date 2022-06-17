@@ -168,7 +168,7 @@ export const CHAINS: { [chainId: number]: BasicChainInformation | ExtendedChainI
         iconUrls: [bscNetworkIcon],
     },
     100: {
-        urls: ['https://rpc.gnosischain.com/'],
+        urls: ['https://rpc.ankr.com/gnosis'],
         name: 'Gnosis Chain',
         nativeCurrency: XDAI,
         blockExplorerUrls: ['https://blockscout.com/xdai/mainnet/'],
