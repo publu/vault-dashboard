@@ -106,7 +106,7 @@ export const RPCS: { [chainId in ChainIdKey]?: string } = {
     [ChainId.MATIC]: 'https://polygon-rpc.com/',
     [ChainId.MOONRIVER]: 'https://moonriver.api.onfinality.io/public',
     [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
-    [ChainId.XDAI]: 'https://rpc-df.xdaichain.com',
+    [ChainId.XDAI]: 'https://rpc.ankr.com/gnosis',
     [ChainId.HARMONY]: 'https://rpc.heavenswail.one',
     [ChainId.OPTIMISM]: 'https://mainnet.optimism.io/',
     [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
