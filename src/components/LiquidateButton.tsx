@@ -54,7 +54,7 @@ const LiquidateButton:React.FC = () => {
                     let allowance = await signerContract.allowance(account, vaultContract.address)
                     console.log(allowance)
                     console.log(vaultDebt)
-                    if (allowance < vaultDebt) {
+                    if (allowance <= vaultDebt) {
                         console.log("approval call")
                         await signerContract.approve(vaultContract.address, ethers.constants.MaxUint256)
                     } else {
