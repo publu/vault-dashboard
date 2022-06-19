@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {Button, useRecordContext} from "react-admin";
 import {useAccount, useChainId, useIsActive, useProvider} from "../Connectors/Metamask";
 import {addOrSwapChain} from "../utils/utils";
@@ -18,16 +18,29 @@ const LiquidateButton:React.FC = () => {
     let chainId = useChainId()
     let metamaskProvider = useProvider()
     let account = useAccount()
+    const vaultContract = record.contract;
+    const vaultId = record.vaultIdx;
+    const vaultChainId = record.chainId;
+    const vaultChainName = record.vaultChainName;
+    const vaultDebt = record.debt;
+    const [buttonLabel, setButtonlabel] = useState("Approve Mai")
+
+    useEffect(() => {
+        const generateButtonLabel = async () => {
+            if (account && metamaskProvider) {
+                let maiContract = QiStablecoin__factory.connect(maiAddresses[vaultChainName], metamaskProvider)
+                let allowance = await maiContract.allowance(account, vaultContract.address)
+                if (allowance > vaultDebt) {
+                    setButtonlabel("Liquidate")
+                }
+            }
+        }
+        generateButtonLabel()
+    },)
 
     return <Button
-        label="Liquidate"
+        label={buttonLabel}
         onClick={ async () => {
-        const vaultContract = record.contract;
-        const vaultId = record.vaultIdx;
-        const vaultChainId = record.chainId;
-        const vaultChainName = record.vaultChainName;
-        const vaultDebt = record.debt;
-
             if (metaMaskIsActive && chainId && metamaskProvider && account) {
                 if (account && !(chainId === vaultChainId)) {
                     await addOrSwapChain(metamaskProvider, account, vaultChainId as ChainKey)
@@ -43,7 +56,7 @@ const LiquidateButton:React.FC = () => {
                     console.log(vaultDebt)
                     if (allowance < vaultDebt) {
                         console.log("approval call")
-                        let approval = await signerContract.approve(vaultContract.address, ethers.constants.MaxUint256)
+                        await signerContract.approve(vaultContract.address, ethers.constants.MaxUint256)
                     } else {
                         let stablecoin = CrosschainQiStablecoin__factory.connect(vaultContract.address, metamaskProvider)
                         signerContract = stablecoin?.connect(metamaskProvider.getSigner())
