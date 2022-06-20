@@ -1,5 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { ethers } from 'ethers'
+import { CrosschainMai__factory } from './contracts/factories'
 
 export const ChainId = {
     MAINNET: 1,
@@ -122,4 +123,8 @@ export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
     [ChainId.HARMONY]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.HARMONY]),
     [ChainId.OPTIMISM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.OPTIMISM]),
     [ChainId.BSC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.BSC]),
+}
+
+export const FACTORIES: {[index: string]: any} = {
+    "Avalanche": CrosschainMai__factory
 }

@@ -3,6 +3,7 @@
 /* eslint-disable */
 export { ERC20__factory } from "./ERC20__factory";
 export { QiStablecoin__factory } from "./QiStablecoin__factory";
+export { CrosschainMai__factory } from "./CrosschainMai__factory";
 export { CrosschainNativeQiStablecoin__factory } from "./CrosschainNativeQiStablecoin__factory";
 export { CrosschainQiStablecoin__factory } from "./CrosschainQiStablecoin__factory";
 export { CrosschainQiStablecoinSlim__factory } from "./CrosschainQiStablecoinSlim__factory";

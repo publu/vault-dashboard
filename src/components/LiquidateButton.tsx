@@ -10,7 +10,7 @@ import {
     QiStablecoin__factory
 } from "../contracts";
 import {ethers} from "ethers";
-import {maiAddresses} from "../constants";
+import {maiAddresses, FACTORIES, PROVIDERS, ChainIdKey} from "../constants";
 
 const LiquidateButton:React.FC = () => {
     const record = useRecordContext();
@@ -26,16 +26,27 @@ const LiquidateButton:React.FC = () => {
     const [buttonLabel, setButtonlabel] = useState("Approve Mai")
 
     useEffect(() => {
-        const generateButtonLabel = async () => {
-            if (account && metamaskProvider) {
-                let maiContract = QiStablecoin__factory.connect(maiAddresses[vaultChainName], metamaskProvider)
-                let allowance = await maiContract.allowance(account, vaultContract.address)
-                if (allowance > vaultDebt) {
-                    setButtonlabel("Liquidate")
+        const generateButtonLabel = async (vaultChainId: ChainIdKey) => {
+            let provider = PROVIDERS[vaultChainId]
+            if (account && metamaskProvider && provider) {
+                if (FACTORIES[vaultChainName]) {
+                    let maiContract = FACTORIES[vaultChainName].connect(maiAddresses[vaultChainName], provider)
+                    let allowance = await maiContract.allowance(account, vaultContract.address)
+                    console.log(`Allowance Check for ${vaultContract.address} on ${vaultChainName}`)
+                    if (allowance > vaultDebt) {
+                        setButtonlabel("Liquidate")
+                    }
+                } else {
+                    let maiContract = QiStablecoin__factory.connect(maiAddresses[vaultChainName], provider)
+                    let allowance = await maiContract.allowance(account, vaultContract.address)
+                    console.log(`Allowance Check for ${vaultContract.address} on ${vaultChainName}`)
+                    if (allowance > vaultDebt) {
+                        setButtonlabel("Liquidate")
+                    }
                 }
             }
         }
-        generateButtonLabel()
+        generateButtonLabel(vaultChainId)
     },)
 
     return <Button
