@@ -1,6 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { ethers } from 'ethers'
-import {CrosschainMai__factory, EditableERC20__factory} from './contracts/factories'
+import {CrosschainMai__factory, EditableERC20__factory, QiStablecoin__factory} from './contracts/factories'
 
 export const ChainId = {
     MAINNET: 1,
@@ -133,5 +133,14 @@ export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
 
 export const FACTORIES: {[chainId in ChainIdKey]?: any} = {
     [ChainId.AVALANCHE]: CrosschainMai__factory,
-    [ChainId.MOONBEAM]: EditableERC20__factory
+    [ChainId.MOONBEAM]: EditableERC20__factory,
+    [ChainId.ARBITRUM]: QiStablecoin__factory,
+    [ChainId.FANTOM]: QiStablecoin__factory,
+    [ChainId.MATIC]: QiStablecoin__factory,
+    [ChainId.MOONRIVER]: EditableERC20__factory,
+    [ChainId.XDAI]: QiStablecoin__factory,
+    [ChainId.HARMONY]: QiStablecoin__factory,
+    [ChainId.OPTIMISM]: QiStablecoin__factory,
+    [ChainId.BSC]: QiStablecoin__factory,
+
 }
