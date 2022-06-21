@@ -29,8 +29,8 @@ const LiquidateButton:React.FC = () => {
         const generateButtonLabel = async (vaultChainId: ChainIdKey) => {
             let provider = PROVIDERS[vaultChainId]
             if (account && metamaskProvider && provider) {
-                if (FACTORIES[vaultChainName]) {
-                    let maiContract = FACTORIES[vaultChainName].connect(maiAddresses[vaultChainName], provider)
+                if (FACTORIES[vaultChainId]) {
+                    let maiContract = FACTORIES[vaultChainId].connect(maiAddresses[vaultChainName], provider)
                     let allowance = await maiContract.allowance(account, vaultContract.address)
                     console.log(`Allowance Check for ${vaultContract.address} on ${vaultChainName}`)
                     if (allowance > vaultDebt) {
