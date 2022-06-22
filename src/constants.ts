@@ -113,7 +113,7 @@ export const RPCS: { [chainId in ChainIdKey]?: string } = {
     [ChainId.MOONRIVER]: 'https://moonriver.api.onfinality.io/public',
     [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
     [ChainId.XDAI]: 'https://rpc.ankr.com/gnosis',
-    [ChainId.HARMONY]: 'https://rpc.heavenswail.one',
+    [ChainId.HARMONY]: 'https://rpc.ankr.com/harmony',
     [ChainId.OPTIMISM]: 'https://mainnet.optimism.io/',
     [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
 }

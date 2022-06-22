@@ -13,7 +13,7 @@ const LiquidateButton:React.FC = () => {
     const record = useRecordContext();
     let metaMaskIsActive = useIsActive()
     let chainId = useChainId()
-    let metamaskProvider = useProvider()
+    let metamaskProvider = useProvider("any")
     let account = useAccount()
     const vaultContract = record.contract;
     const vaultId = record.vaultIdx;
@@ -43,12 +43,15 @@ const LiquidateButton:React.FC = () => {
             if (metaMaskIsActive && chainId && metamaskProvider && account) {
                 if (account && !(chainId === vaultChainId)) {
                     await addOrSwapChain(metamaskProvider, account, vaultChainId as ChainKey)
+                    let network = await metamaskProvider.getNetwork()
+                    chainId = network.chainId
                 }
                 console.log(maiAddresses[vaultChainName])
                 console.log(vaultChainName)
                 let maiContract = FACTORIES[vaultChainId as ChainIdKey].connect(maiAddresses[vaultChainName], metamaskProvider)
                 // let maiBalance = maiContract.balanceOf(account)
                 let signerContract = maiContract?.connect(metamaskProvider.getSigner())
+
                 if(account && signerContract && (chainId === vaultChainId)) {
                     let allowance = await signerContract.allowance(account, vaultContract.address)
                     console.log(allowance)
