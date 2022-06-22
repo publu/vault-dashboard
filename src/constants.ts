@@ -131,7 +131,7 @@ export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
     [ChainId.BSC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.BSC]),
 }
 
-export const FACTORIES: {[chainId in ChainIdKey]?: any} = {
+export const MAIFACTORIES: {[chainId in ChainIdKey]?: any} = {
     [ChainId.AVALANCHE]: CrosschainMai__factory,
     [ChainId.MOONBEAM]: EditableERC20__factory,
     [ChainId.ARBITRUM]: QiStablecoin__factory,

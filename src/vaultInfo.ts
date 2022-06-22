@@ -16,9 +16,10 @@ export interface VaultInfo {
     contract: Contract
     chainId: ChainIdKey
     vaultChainName: string
+    vaultFactory: any
 }
 
-export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
+export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18, factory: any) {
     const ethersProvider = new JsonRpcProvider(RPCS[chainId])
     const vaultContract = new Contract(contractAddress, abi)
 
@@ -51,6 +52,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     const ownerCalls = vaultsToFetch.map(i => vaultContract.ownerOf(i))
     const owners = await multicall(chainId, ownerCalls)
     const vaultChainName = ChainName[chainId]
+    const vaultFactory = factory
 
     // let x = Erc20QiStablecoin__factory.connect(contractAddress, ethersProvider)
 
@@ -64,7 +66,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
         const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, vaultFactory })
     }
     return vaultInfo
 }
