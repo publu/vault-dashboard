@@ -2,7 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export { ERC20__factory } from "./ERC20__factory";
+export { EditableERC20__factory } from "./EditableERC20__factory";
 export { QiStablecoin__factory } from "./QiStablecoin__factory";
+export { CrosschainMai__factory } from "./CrosschainMai__factory";
 export { CrosschainNativeQiStablecoin__factory } from "./CrosschainNativeQiStablecoin__factory";
 export { CrosschainQiStablecoin__factory } from "./CrosschainQiStablecoin__factory";
 export { CrosschainQiStablecoinSlim__factory } from "./CrosschainQiStablecoinSlim__factory";
@@ -10,3 +12,4 @@ export { CrosschainQiStablecoinSlimV2__factory } from "./CrosschainQiStablecoinS
 export { CrosschainQiStablecoinV2__factory } from "./CrosschainQiStablecoinV2__factory";
 export { CrosschainQiStablecoinwbtc__factory } from "./CrosschainQiStablecoinwbtc__factory";
 export { Erc20QiStablecoin__factory } from "./Erc20QiStablecoin__factory";
+export { StableQiVault__factory } from "./StableQiVault__factory";

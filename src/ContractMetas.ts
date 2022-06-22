@@ -6,7 +6,7 @@ import {
     CrosschainQiStablecoinSlimV2__factory,
     CrosschainQiStablecoinV2__factory,
     CrosschainQiStablecoinwbtc__factory,
-    Erc20QiStablecoin__factory
+    Erc20QiStablecoin__factory, StableQiVault__factory
 } from './contracts'
 
 export interface ContractMeta {
@@ -94,5 +94,9 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.BSC]: [
         { label: 'WBNB', address: '0xa56f9a54880afbc30cf29bb66d2d9adcdcaeadd6', abi: CrosschainQiStablecoinSlim__factory.abi },
         { label: 'CAKE', address: '0x014a177e9642d1b4e970418f894985dc1b85657f', abi: CrosschainQiStablecoinSlim__factory.abi },
+    ],
+    [ChainId.MOONBEAM]: [
+        { label: 'xStella', address: '0x3756465c5b1C1C4cEe473880c9726E20875284f1', abi: StableQiVault__factory.abi },
+        { label: 'GLMR', address: '0x3A82F4da24F93a32dc3C2A28cFA9D6E63EC28531', abi: StableQiVault__factory.abi },
     ]
 }

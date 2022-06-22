@@ -1,5 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { ethers } from 'ethers'
+import {CrosschainMai__factory, EditableERC20__factory, QiStablecoin__factory} from './contracts/factories'
 
 export const ChainId = {
     MAINNET: 1,
@@ -15,6 +16,7 @@ export const ChainId = {
     BSC: 56,
     BSC_TESTNET: 97,
     ARBITRUM: 42161,
+    MOONBEAM: 1284,
     MOONBASE: 1287,
     AVALANCHE: 43114,
     FUJI: 43113,
@@ -41,6 +43,7 @@ export const ChainName = {
     56: "BSC",
     97: "BSC_TESTNET",
     42161: "ARBITRUM",
+    1284: "MOONBEAM",
     1287: "MOONBASE",
     43114: "AVALANCHE",
     43113: "FUJI",
@@ -70,6 +73,7 @@ export const maiAddresses: {[index: string]:any} = {
     "CELO": "0xB9C8F0d3254007eE4b98970b94544e473Cd610EC",
     "IOTEX": "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d",
     "OPTIMISM": "0xdFA46478F9e5EA86d57387849598dbFB2e964b02",
+    "MOONBEAM": "0xdfa46478f9e5ea86d57387849598dbfb2e964b02"
 }
 
 export type ChainIdKey = typeof ChainId[keyof typeof ChainId]
@@ -95,6 +99,7 @@ export const MULTICALL_NETWORKS: { [chainId in ChainIdKey]: string } = {
     [ChainId.HECO_TESTNET]: '0x935Bfe9AfaA2Be26049ea4EDE40A3A2243361F87',
     [ChainId.HARMONY]: '0xFE4980f62D708c2A84D3929859Ea226340759320',
     [ChainId.HARMONY_TESTNET]: '0xbcd3451992B923531615293Cb2b2c38ba8DE9529',
+    [ChainId.MOONBEAM]: '0x83e3b61886770de2F64AAcaD2724ED4f08F7f36B',
     [ChainId.MOONRIVER]: '0xe05349d6fE12602F6084550995B247a5C80C0E2C',
     [ChainId.CRONOS]: '0xA25da25BD11A26F1dd4ea195948305fb7C8cA102',
     [ChainId.OPTIMISM]: '0x142e2feac30d7fc3b61f9ee85fccad8e560154cc',
@@ -104,6 +109,7 @@ export const RPCS: { [chainId in ChainIdKey]?: string } = {
     [ChainId.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
     [ChainId.FANTOM]: 'https://rpc.ftm.tools/',
     [ChainId.MATIC]: 'https://polygon-rpc.com/',
+    [ChainId.MOONBEAM]: 'https://rpc.api.moonbeam.network',
     [ChainId.MOONRIVER]: 'https://moonriver.api.onfinality.io/public',
     [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
     [ChainId.XDAI]: 'https://rpc.ankr.com/gnosis',
@@ -116,10 +122,25 @@ export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
     [ChainId.ARBITRUM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.ARBITRUM]),
     [ChainId.FANTOM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.FANTOM]),
     [ChainId.MATIC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.MATIC]),
+    [ChainId.MOONBEAM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.MOONBEAM]),
     [ChainId.MOONRIVER]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.MOONRIVER]),
     [ChainId.AVALANCHE]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.AVALANCHE]),
     [ChainId.XDAI]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.XDAI]),
     [ChainId.HARMONY]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.HARMONY]),
     [ChainId.OPTIMISM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.OPTIMISM]),
     [ChainId.BSC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.BSC]),
+}
+
+export const FACTORIES: {[chainId in ChainIdKey]?: any} = {
+    [ChainId.AVALANCHE]: CrosschainMai__factory,
+    [ChainId.MOONBEAM]: EditableERC20__factory,
+    [ChainId.ARBITRUM]: QiStablecoin__factory,
+    [ChainId.FANTOM]: QiStablecoin__factory,
+    [ChainId.MATIC]: QiStablecoin__factory,
+    [ChainId.MOONRIVER]: EditableERC20__factory,
+    [ChainId.XDAI]: QiStablecoin__factory,
+    [ChainId.HARMONY]: QiStablecoin__factory,
+    [ChainId.OPTIMISM]: QiStablecoin__factory,
+    [ChainId.BSC]: QiStablecoin__factory,
+
 }
