@@ -54,8 +54,6 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     const vaultChainName = ChainName[chainId]
     const vaultFactory = factory
 
-    // let x = Erc20QiStablecoin__factory.connect(contractAddress, ethersProvider)
-
     const vaultInfo: VaultInfo[] = []
 
     for (let i = 0; i < vaultsToFetch.length; i++) {

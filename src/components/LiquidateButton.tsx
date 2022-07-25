@@ -18,7 +18,7 @@ const LiquidateButton:React.FC = () => {
     const vaultChainId = record.chainId;
     const vaultChainName = record.vaultChainName;
     const vaultDebt = record.debt;
-    const [buttonLabel, setButtonlabel] = useState("Approve Mai")
+    const [buttonLabel, setButtonLabel] = useState("Approve Mai")
 
     useEffect(() => {
         const generateButtonLabel = async (vaultChainId: ChainIdKey) => {
@@ -28,7 +28,7 @@ const LiquidateButton:React.FC = () => {
                     let allowance = await maiContract.allowance(account, vaultContract.address)
                     console.log(`Allowance Check for ${vaultContract.address} on ${vaultChainName}`)
                     if (allowance > vaultDebt) {
-                        setButtonlabel("Liquidate")
+                        setButtonLabel("Liquidate")
                 }
             }
         }

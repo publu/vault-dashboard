@@ -41,6 +41,7 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
         { label: 'cxWETH', address: '0x7d36999a69f2b99bf3fb98866cbbe47af43696c8', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
         { label: 'dQUICK', address: '0x649Aa6E6b6194250C077DF4fB37c23EE6c098513', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
         { label: 'vGHST', address: '0x1f0aa72b980d65518e88841ba1da075bd43fa933', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
+        // Add xxDai and xxLink once deployed
     ],
     [ChainId.FANTOM]: [
         { label: 'WFTM', address: '0x1066b8FC999c1eE94241344818486D5f944331A0', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
@@ -62,6 +63,8 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
         { label: 'mooBooBTC-FTM', address: '0xf34e271312e41bbd7c451b76af2af8339d6f16ed', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
         { label: 'mooBooETH-FTM', address: '0x9ba01b1279b1f7152b42aca69faf756029a9abde', abi: Erc20QiStablecoin__factory.abi, factory: Erc20QiStablecoin__factory },
         { label: 'mooBIFI', address: '0x75d4ab6843593c111eeb02ff07055009c836a1ef', abi: CrosschainQiStablecoin__factory.abi, factory: CrosschainQiStablecoin__factory },
+        { label: 'xBoo', address: '0x3f6cf10e85e9c0630856599FAB8D8BFcd9C0E7D4', abi: StableQiVault__factory.abi, factory: StableQiVault__factory },
+        // Add yvUSDC once deployed
     ],
     [ChainId.AVALANCHE]: [
         { label: 'mooAaveAVAX', address: '0xfA19c1d104F4AEfb8d5564f02B3AdCa1b515da58', abi: CrosschainQiStablecoin__factory.abi, factory: CrosschainQiStablecoin__factory },
@@ -95,9 +98,13 @@ export const Contracts: { [chainId in ChainIdKey]?: ContractMeta[] } = {
     [ChainId.BSC]: [
         { label: 'WBNB', address: '0xa56f9a54880afbc30cf29bb66d2d9adcdcaeadd6', abi: CrosschainQiStablecoinSlim__factory.abi, factory: CrosschainQiStablecoinSlim__factory },
         { label: 'CAKE', address: '0x014a177e9642d1b4e970418f894985dc1b85657f', abi: CrosschainQiStablecoinSlim__factory.abi, factory: CrosschainQiStablecoinSlim__factory },
+        { label: 'DODO', address: '0x7333fd58d8D73a8e5FC1a16C8037ADa4f580FA2B', abi: StableQiVault__factory.abi, factory: StableQiVault__factory },
     ],
     [ChainId.MOONBEAM]: [
         { label: 'xStella', address: '0x3756465c5b1C1C4cEe473880c9726E20875284f1', abi: StableQiVault__factory.abi, factory: StableQiVault__factory },
         { label: 'GLMR', address: '0x3A82F4da24F93a32dc3C2A28cFA9D6E63EC28531', abi: StableQiVault__factory.abi, factory: StableQiVault__factory },
+    ],
+    [ChainId.METIS]: [
+        { label: 'Metis', address: '0x10dcbee8afa39a847707e16aea5eb34c6b01aba9', abi: StableQiVault__factory.abi, factory: StableQiVault__factory}
     ]
 }

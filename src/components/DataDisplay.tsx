@@ -20,7 +20,7 @@ const DataDisplay: React.FC = () => {
             const chainIds = [
                 ChainId.MATIC, ChainId.FANTOM,
                 ChainId.AVALANCHE, ChainId.ARBITRUM, ChainId.MOONRIVER,
-                ChainId.HARMONY, ChainId.XDAI, ChainId.OPTIMISM, ChainId.BSC, ChainId.MOONBEAM
+                ChainId.HARMONY, ChainId.XDAI, ChainId.OPTIMISM, ChainId.BSC, ChainId.MOONBEAM, ChainId.METIS
             ]
             const vaultInfoPromises = chainIds.flatMap((chainId) => {
                 const contracts = Contracts[chainId];

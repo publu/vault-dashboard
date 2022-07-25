@@ -27,6 +27,7 @@ export const ChainId = {
     MOONRIVER: 1285,
     CRONOS: 25,
     OPTIMISM: 10,
+    METIS: 1088
 } as const
 
 export const ChainName = {
@@ -54,6 +55,7 @@ export const ChainName = {
     1285: "MOONRIVER",
     25: "CRONOS",
     10: "OPTIMISM",
+    1088: "METIS"
 } as const
 
 export const maiAddresses: {[index: string]:any} = {
@@ -73,7 +75,7 @@ export const maiAddresses: {[index: string]:any} = {
     "CELO": "0xB9C8F0d3254007eE4b98970b94544e473Cd610EC",
     "IOTEX": "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d",
     "OPTIMISM": "0xdFA46478F9e5EA86d57387849598dbFB2e964b02",
-    "MOONBEAM": "0xdfa46478f9e5ea86d57387849598dbfb2e964b02"
+    "MOONBEAM": "0xdfa46478f9e5ea86d57387849598dbfb2e964b02",
 }
 
 export type ChainIdKey = typeof ChainId[keyof typeof ChainId]
@@ -103,6 +105,7 @@ export const MULTICALL_NETWORKS: { [chainId in ChainIdKey]: string } = {
     [ChainId.MOONRIVER]: '0xe05349d6fE12602F6084550995B247a5C80C0E2C',
     [ChainId.CRONOS]: '0xA25da25BD11A26F1dd4ea195948305fb7C8cA102',
     [ChainId.OPTIMISM]: '0x142e2feac30d7fc3b61f9ee85fccad8e560154cc',
+    [ChainId.METIS]: '0xc39aBB6c4451089dE48Cffb013c39d3110530e5C'
 }
 
 export const RPCS: { [chainId in ChainIdKey]?: string } = {
@@ -116,6 +119,7 @@ export const RPCS: { [chainId in ChainIdKey]?: string } = {
     [ChainId.HARMONY]: 'https://rpc.ankr.com/harmony',
     [ChainId.OPTIMISM]: 'https://mainnet.optimism.io/',
     [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
+    [ChainId.METIS]: 'https://andromeda.metis.io/?owner=1088'
 }
 
 export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
@@ -129,6 +133,7 @@ export const PROVIDERS: { [chainId in ChainIdKey]?: JsonRpcProvider } = {
     [ChainId.HARMONY]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.HARMONY]),
     [ChainId.OPTIMISM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.OPTIMISM]),
     [ChainId.BSC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.BSC]),
+    [ChainId.METIS]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.METIS])
 }
 
 export const MAIFACTORIES: {[chainId in ChainIdKey]?: any} = {
@@ -142,5 +147,6 @@ export const MAIFACTORIES: {[chainId in ChainIdKey]?: any} = {
     [ChainId.HARMONY]: QiStablecoin__factory,
     [ChainId.OPTIMISM]: QiStablecoin__factory,
     [ChainId.BSC]: QiStablecoin__factory,
+    [ChainId.METIS]: EditableERC20__factory
 
 }
