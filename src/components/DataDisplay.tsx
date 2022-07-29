@@ -36,10 +36,10 @@ const DataDisplay: React.FC = () => {
                         console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
                         const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals)
                         vaults.forEach(v => {
-                            if (addedVaults.has(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName']))){
+                            if (addedVaults.has(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName', 'risky']))){
                                 console.log("duplicate vault")
                             } else {
-                                addedVaults.add(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName']))
+                                addedVaults.add(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName', 'risky']))
                                 dataProvider.create('vaults', {data: v})
                             }
 

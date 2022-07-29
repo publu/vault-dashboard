@@ -26,6 +26,7 @@ const VaultList: React.FC = () => {
             <NumberField source="collateral" options={{style: 'decimal'}}/>
             <NumberField source="debt" options={{ style: 'currency', currency: 'USD' }}/>
             <NumberField source="cdr" options={{style: 'percent'}}/>
+            <NumberField source="risky"/>
             <LiquidateButton/>
         </Datagrid>
     </List>)

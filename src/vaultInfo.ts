@@ -12,10 +12,11 @@ export interface VaultInfo {
     cdr: number;
     collateral: number;
     debt: number;
-    vaultIdx: number
-    contract: Contract
-    chainId: ChainIdKey
-    vaultChainName: string
+    vaultIdx: number;
+    contract: Contract;
+    chainId: ChainIdKey;
+    vaultChainName: string;
+    risky: number;
 }
 
 export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
@@ -50,6 +51,10 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     const debtAmounts = await multicall(chainId, debtCalls)
     const ownerCalls = vaultsToFetch.map(i => vaultContract.ownerOf(i))
     const owners = await multicall(chainId, ownerCalls)
+
+    const riskyCalls = vaultsToFetch.map(i => vaultContract.checkLiquidation(i))
+    const riskyVaults = await multicall(chainId, riskyCalls)
+
     const vaultChainName = ChainName[chainId]
 
     // let x = Erc20QiStablecoin__factory.connect(contractAddress, ethersProvider)
@@ -59,12 +64,14 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     for (let i = 0; i < vaultsToFetch.length; i++) {
         const vaultIdx = vaultsToFetch[i]
         const owner = owners[i]
+        const risky = riskyVaults[i]
+
         const collateral = collateralAmounts[i] as unknown as number / decimals
         const debt = debtAmounts[i] as unknown as number / 1e18
         const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, risky })
     }
     return vaultInfo
 }
