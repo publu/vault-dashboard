@@ -6,7 +6,7 @@ const chainId = ChainId.MATIC
 const contractMetas: ContractMeta[] | undefined = Contracts[chainId]
 
 export const vaultInfoPromises = contractMetas?.map((contractMeta) => {
-    return fetchVaultInfo(chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals, contractMeta.factory)
+    return fetchVaultInfo(chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals, contractMeta.factory, contractMeta.slug)
 })
 
 export const buildVaultData = (vaultInfoPromises: []) => {

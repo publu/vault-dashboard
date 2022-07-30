@@ -7,6 +7,7 @@ import {fetchVaultInfo} from "../vaultInfo";
 import {Admin, Resource, useNotify } from "react-admin";
 import {theme} from "../theme";
 import VaultList from "./VaultList";
+import { BrowserRouter } from 'react-router-dom';
 
 let addedVaults = new Set()
 
@@ -34,7 +35,7 @@ const DataDisplay: React.FC = () => {
                 if (contractMeta){
                     try {
                         console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
-                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals, contractMeta.factory)
+                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals, contractMeta.factory, contractMeta.slug)
                         vaults.forEach(v => {
                             if (addedVaults.has(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName']))){
                                 console.log("duplicate vault")
@@ -65,9 +66,12 @@ const DataDisplay: React.FC = () => {
     }, [dataProvider, notify])
 
     return (
-        <Admin dataProvider={dataProvider} theme={theme}>
-            <Resource name={'vaults'} list={VaultList}/>
-        </Admin>
+        <BrowserRouter>
+            <Admin dataProvider={dataProvider} theme={theme}>
+                <Resource name={'vaults'} list={VaultList}/>
+            </Admin>
+        </BrowserRouter>
+
     );
 }
 

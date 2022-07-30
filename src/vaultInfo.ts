@@ -17,9 +17,11 @@ export interface VaultInfo {
     chainId: ChainIdKey
     vaultChainName: string
     vaultFactory: any
+    vaultLink: string
+    slug: string
 }
 
-export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18, factory: any) {
+export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18, factory: any, slug: string) {
     const ethersProvider = new JsonRpcProvider(RPCS[chainId])
     const vaultContract = new Contract(contractAddress, abi)
 
@@ -58,13 +60,14 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
 
     for (let i = 0; i < vaultsToFetch.length; i++) {
         const vaultIdx = vaultsToFetch[i]
+        const vaultLink = "https://app.mai.finance/vaults/"+chainId.toString()+"/"+slug+"/"+vaultIdx.toString()
         const owner = owners[i]
         const collateral = collateralAmounts[i] as unknown as number / decimals
         const debt = debtAmounts[i] as unknown as number / 1e18
         const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, vaultFactory })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, vaultFactory, vaultLink, slug })
     }
     return vaultInfo
 }
