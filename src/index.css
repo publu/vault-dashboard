@@ -10,6 +10,11 @@ a {
   margin: .5rem;
   padding: .5rem;
 }
+
+a:visited {
+  color: #42a5f5
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
