@@ -12,10 +12,6 @@ export interface VaultInfo {
     cdr: number;
     collateral: number;
     debt: number;
-    vaultIdx: number;
-    contract: Contract;
-    chainId: ChainIdKey;
-    vaultChainName: string;
     vaultIdx: number
     contract: Contract
     chainId: ChainIdKey
