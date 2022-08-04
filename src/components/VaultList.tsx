@@ -6,6 +6,7 @@ import DashPagination from "./DashPagination"
 import {TopToolbar, FilterButton, ExportButton} from "react-admin";
 import {NetworkButton} from "./MetaMaskConnectButton";
 import LiquidateButton from './LiquidateButton'
+import {DeepLinkField} from "./DeepLinkField";
 
 const ListActions = () => (
     <TopToolbar>
@@ -27,6 +28,7 @@ const VaultList: React.FC = () => {
             <NumberField source="debt" options={{ style: 'currency', currency: 'USD' }}/>
             <NumberField source="cdr" options={{style: 'percent'}}/>
             <NumberField source="risky"/>
+            <DeepLinkField source="vaultLink"/>
             <LiquidateButton/>
         </Datagrid>
     </List>)

@@ -16,10 +16,17 @@ export interface VaultInfo {
     contract: Contract;
     chainId: ChainIdKey;
     vaultChainName: string;
+    vaultIdx: number
+    contract: Contract
+    chainId: ChainIdKey
+    vaultChainName: string
+    vaultFactory: any
+    vaultLink: string
+    slug: string
     risky: number;
 }
 
-export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18) {
+export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18, factory: any, slug: string) {
     const ethersProvider = new JsonRpcProvider(RPCS[chainId])
     const vaultContract = new Contract(contractAddress, abi)
 
@@ -56,13 +63,13 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
     const riskyVaults = await multicall(chainId, riskyCalls)
 
     const vaultChainName = ChainName[chainId]
-
-    // let x = Erc20QiStablecoin__factory.connect(contractAddress, ethersProvider)
+    const vaultFactory = factory
 
     const vaultInfo: VaultInfo[] = []
 
     for (let i = 0; i < vaultsToFetch.length; i++) {
         const vaultIdx = vaultsToFetch[i]
+        const vaultLink = "https://app.mai.finance/vaults/"+chainId.toString()+"/"+slug+"/"+vaultIdx.toString()
         const owner = owners[i]
         const risky = riskyVaults[i]
 
@@ -71,7 +78,7 @@ export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: strin
         const contract  = vaultContract
         let cdr = collateral * collateralPrice / debt
         cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, risky })
+        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, vaultFactory, vaultLink, risky, slug })
     }
     return vaultInfo
 }
