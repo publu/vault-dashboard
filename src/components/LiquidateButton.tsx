@@ -39,11 +39,17 @@ const LiquidateButton:React.FC = () => {
         label={buttonLabel}
         onClick={ async () => {
             if (metaMaskIsActive && chainId && metamaskProvider && account) {
-                if (account && !(chainId === vaultChainId)) {
+                console.log(metaMaskIsActive , chainId , metamaskProvider , account)
+                
+                /*
+                if (account && !(chainId === vaultChainId) && vaultChainId ) {
                     await addOrSwapChain(metamaskProvider, account, vaultChainId as ChainKey)
                     let network = await metamaskProvider.getNetwork()
                     chainId = network.chainId
-                }
+                } else{
+                    console.log("here?")
+                    
+                }*/
                 console.log(maiAddresses[vaultChainName])
                 console.log(vaultChainName)
                 let maiContract = MAIFACTORIES[vaultChainId as ChainIdKey].connect(maiAddresses[vaultChainName], metamaskProvider)
@@ -58,10 +64,17 @@ const LiquidateButton:React.FC = () => {
                         console.log("approval call")
                         await signerContract.approve(vaultContract.address, ethers.constants.MaxUint256)
                     } else {
+                        console.log("already approved")
                         let stablecoin = vaultFactory.connect(vaultContract.address, metamaskProvider)
                         signerContract = stablecoin?.connect(metamaskProvider.getSigner())
-                        let tx = await signerContract.liquidateVault(vaultId)
-                        await tx.wait(1)
+                        console.log("liquidating")
+                        try{
+                            let tx = await signerContract.liquidateVault(vaultId)
+                            await tx.wait(1)
+                        } catch (e) {
+                            let tx = await signerContract.liquidateVault(vaultId, 0)
+                            await tx.wait(1)
+                        }
                     }
 
                 } else {
