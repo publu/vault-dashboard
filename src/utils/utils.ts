@@ -1,6 +1,6 @@
 import {BigNumberish, ethers} from 'ethers'
-import {ChainId, ChainKey} from "../Connectors/Chains";
 import {Web3Provider} from "@ethersproject/providers";
+import { ChainId } from '@qidao/sdk';
 
 export const formatAmount = (amount: BigNumberish) => {
     let floatNumber = 18
@@ -33,7 +33,7 @@ export const RPC = {
     [ChainId.OPTIMISM]: 'https://mainnet.optimism.io/',
 }
 
-export const PARAMS: {[K in ChainKey]?: any} = {
+export const PARAMS: {[K in ChainId]?: any} = {
     [ChainId.MAINNET]: {
         chainId: '0x1',
         chainName: 'Ethereum',
@@ -169,7 +169,7 @@ export const PARAMS: {[K in ChainKey]?: any} = {
 }
 
 
-export async function addOrSwapChain(activeLibrary: Web3Provider, account: string, cId: ChainKey) {
+export async function addOrSwapChain(activeLibrary: Web3Provider, account: string, cId: ChainId) {
     const params = PARAMS[cId]
     await activeLibrary?.send('wallet_addEthereumChain', [params, account])
 

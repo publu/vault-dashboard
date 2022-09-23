@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@qidao/sdk": "5.1.19",
+    "@ethersproject/keccak256": "5.7.0",
+    "@ethersproject/providers": "5.7.0",
+    "@ethersproject/strings": "5.7.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@metamask/detect-provider": "^1.2.0",
@@ -19,6 +23,7 @@
     "@web3-react/core": "^8.0.12-beta.0",
     "@web3-react/metamask": "^8.0.8-beta.0",
     "@web3-react/network": "^8.0.8-beta.0",
+    "ethers": "5.7.0",
     "ethers-multicall": "^0.2.3",
     "lodash": "^4.17.21",
     "prop-types": "^15.8.1",
@@ -36,13 +41,14 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/ethers-v5": "^10.1.0",
     "@types/lodash": "^4.14.182",
     "hardhat": "^2.9.7",
-    "typechain": "^8.0.0"
+    "typechain": "^8.1.0",
+    "prettier": "^2.7.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set NODE_OPTIONS=--max_old_space_size=8192 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

@@ -1,78 +1,116 @@
-import React, {useLayoutEffect} from "react";
+import { ChainId, COLLATERALS } from "@qidao/sdk";
+import React, { useLayoutEffect } from "react";
 import fakeDataProvider from "ra-data-fakerest";
-import {init} from "../multicall";
-import {ChainId} from "../constants";
-import {Contracts} from "../ContractMetas";
-import {fetchVaultInfo} from "../vaultInfo";
-import {Admin, Resource, useNotify } from "react-admin";
-import {theme} from "../theme";
+import { init } from "../multicall";
+import { fetchVaultInfo } from "../vaultInfo";
+import { Admin, Resource, useNotify } from "react-admin";
+import { theme } from "../theme";
 import VaultList from "./VaultList";
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from "react-router-dom";
 
-let addedVaults = new Set()
+let addedVaults = new Set();
 
 const DataDisplay: React.FC = () => {
-    const dataProvider = fakeDataProvider({vaults:[]});
-    const notify = useNotify()
-    useLayoutEffect(() => {
-        const effect = async () => {
-            await init()
+  const dataProvider = fakeDataProvider({
+    vaults: [],
+    vaultsForCollection: [],
+  });
+  const notify = useNotify();
+  useLayoutEffect(() => {
+    const effect = async () => {
+      await init();
 
-            const chainIds = [
-                ChainId.MATIC, ChainId.FANTOM,
-                ChainId.AVALANCHE, ChainId.ARBITRUM, ChainId.MOONRIVER,
-                ChainId.HARMONY, ChainId.XDAI, ChainId.OPTIMISM, ChainId.BSC, ChainId.MOONBEAM, ChainId.METIS
-            ]
-            const vaultInfoPromises = chainIds.flatMap((chainId) => {
-                const contracts = Contracts[chainId];
-                if (contracts)
-                    return contracts.map(c => {
-                        return {...c, chainId}
-                    })
-                else
-                    return []
-            }).flatMap(async (contractMeta) => {
-                if (contractMeta){
-                    try {
-                        console.info(`Fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
-                        const vaults = await fetchVaultInfo(contractMeta.chainId, contractMeta.address, contractMeta.abi, contractMeta.decimals, contractMeta.factory, contractMeta.slug)
-                        vaults.forEach(v => {
-                            if (addedVaults.has(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName', 'risky']))){
-                                console.log("duplicate vault")
-                            } else {
-                                addedVaults.add(JSON.stringify(v, ['vaultIdx', 'collateral', 'debt', 'owner', 'tokenName', 'risky']))
-                                dataProvider.create('vaults', {data: v})
-                            }
-
-                        })
-                        notify(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
-                        console.info(`Fetched: ${contractMeta.label} on ${contractMeta.chainId}`)
-
-                    } catch (e: any) {
-                        console.error(`Error fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
-                        notify(`Error fetching: ${contractMeta.label} on ${contractMeta.chainId}`)
-                    }
+      const chainIds = [
+        ChainId.MATIC,
+        ChainId.FANTOM,
+        ChainId.AVALANCHE,
+        ChainId.ARBITRUM,
+        ChainId.MOONRIVER,
+        ChainId.HARMONY,
+        ChainId.XDAI,
+        ChainId.OPTIMISM,
+        ChainId.BSC,
+        ChainId.MOONBEAM,
+        ChainId.METIS,
+      ];
+      const vaultInfoPromises = chainIds
+        .flatMap((chainId) => {
+          const contracts = COLLATERALS[chainId];
+          if (contracts)
+            return contracts.map((c) => {
+              return { ...c };
+            });
+          else return [];
+        })
+        .flatMap(async (contractMeta) => {
+          if (contractMeta) {
+            try {
+              console.info(
+                `Fetching: ${contractMeta.shortName} on ${contractMeta.chainId}`
+              );
+              const vaults = await fetchVaultInfo(contractMeta);
+              vaults.forEach((v) => {
+                if (
+                  addedVaults.has(
+                    JSON.stringify(v, [
+                      "vaultIdx",
+                      "collateral",
+                      "debt",
+                      "owner",
+                      "tokenName",
+                      "risky",
+                    ])
+                  )
+                ) {
+                  console.log("duplicate vault");
+                } else {
+                  addedVaults.add(
+                    JSON.stringify(v, [
+                      "vaultIdx",
+                      "collateral",
+                      "debt",
+                      "owner",
+                      "tokenName",
+                      "risky",
+                    ])
+                  );
+                  dataProvider.create("vaults", { data: v });
                 }
-            })
-
-            if (vaultInfoPromises) {
-                await Promise.all(vaultInfoPromises)
-                console.info("Finished")
+              });
+              notify(
+                `Fetched: ${contractMeta.token.name} on ${contractMeta.chainId}`
+              );
+              console.info(
+                `Fetched: ${contractMeta.token.name} on ${contractMeta.chainId}`
+              );
+            } catch (e: any) {
+              console.error(
+                `Error fetching: ${contractMeta.token.name} on ${contractMeta.chainId}`
+              );
+              notify(
+                `Error fetching: ${contractMeta.token.name} on ${contractMeta.chainId}`
+              );
             }
-        }
+          }
+        });
 
-        void effect()
+      if (vaultInfoPromises) {
+        await Promise.all(vaultInfoPromises);
+        console.info("Finished");
+      }
+    };
 
-    }, [dataProvider, notify])
+    void effect();
+  }, [dataProvider, notify]);
 
-    return (
-        <BrowserRouter>
-            <Admin dataProvider={dataProvider} theme={theme}>
-                <Resource name={'vaults'} list={VaultList}/>
-            </Admin>
-        </BrowserRouter>
+  return (
+    <BrowserRouter>
+      <Admin dataProvider={dataProvider} theme={theme}>
+        <Resource name={"vaults"} list={VaultList} />
+        {/*<Resource name={"vaultsForCollection"} list={VaultList} />*/}
+      </Admin>
+    </BrowserRouter>
+  );
+};
 
-    );
-}
-
-export default DataDisplay
+export default DataDisplay;
