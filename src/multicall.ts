@@ -6,6 +6,7 @@ const ethcallProvider: { [chainId in ChainId]?: Provider } = {};
 
 async function setupAndInitMulticall(chainId: ChainId) {
   setMulticallAddress(chainId, MULTICALL_NETWORKS[chainId] || "");
+  console.log(`Setting up multicall for Chain ${chainId}`)
   let provider = PROVIDERS[chainId];
   if (provider) {
     const callProvider = new Provider(provider);
@@ -26,6 +27,7 @@ export async function init() {
 
 export async function multicall(chainId: ChainId, calls: any[]) {
   const callProvider = ethcallProvider[chainId];
+  console.log({callProvider, chainId})
   if (callProvider) {
     return await callProvider.all(calls);
   } else {

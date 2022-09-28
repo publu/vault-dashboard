@@ -21,6 +21,7 @@ const DataDisplay: React.FC = () => {
       await init();
 
       const chainIds = [
+        ChainId.MAINNET,
         ChainId.MATIC,
         ChainId.FANTOM,
         ChainId.AVALANCHE,
@@ -35,7 +36,7 @@ const DataDisplay: React.FC = () => {
       ];
       const vaultInfoPromises = chainIds
         .flatMap((chainId) => {
-          const contracts = COLLATERALS[chainId];
+          const contracts = COLLATERALS[chainId]?.filter(c => !c.disabled);
           if (contracts)
             return contracts.map((c) => {
               return { ...c };
@@ -85,7 +86,7 @@ const DataDisplay: React.FC = () => {
               );
             } catch (e: any) {
               console.error(
-                `Error fetching: ${contractMeta.token.name} on ${contractMeta.chainId}`
+                `Error fetching: ${contractMeta.token.name} on ${contractMeta.chainId}`, e
               );
               notify(
                 `Error fetching: ${contractMeta.token.name} on ${contractMeta.chainId}`

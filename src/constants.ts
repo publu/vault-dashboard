@@ -1,11 +1,6 @@
-import { JsonRpcProvider } from "@ethersproject/providers";
-import { ChainId } from "@qidao/sdk";
-import { ethers } from "ethers";
-import {
-  CrosschainMai__factory,
-  EditableERC20__factory,
-  QiStablecoin__factory,
-} from "./contracts/factories";
+import {JsonRpcProvider} from "@ethersproject/providers";
+import {ChainId} from "@qidao/sdk";
+import {CrosschainMai__factory, EditableERC20__factory, QiStablecoin__factory,} from "./contracts/factories";
 
 export const ChainName: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: "Ethereum",
@@ -95,14 +90,10 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
 export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [ChainId.MAINNET]: "https://rpc.ankr.com/eth",
-  [ChainId.ROPSTEN]:
-    "https://eth-ropsten.alchemyapi.io/v2/cidKix2Xr-snU3f6f6Zjq_rYdalKKHmW",
-  [ChainId.RINKEBY]:
-    "https://eth-rinkeby.alchemyapi.io/v2/XVLwDlhGP6ApBXFz_lfv0aZ6VmurWhYD",
-  [ChainId.GÖRLI]:
-    "https://eth-goerli.alchemyapi.io/v2/Dkk5d02QjttYEoGmhZnJG37rKt8Yl3Im",
-  [ChainId.KOVAN]:
-    "https://eth-kovan.alchemyapi.io/v2/6OVAa_B_rypWWl9HqtiYK26IRxXiYqER",
+  [ChainId.ROPSTEN]: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  [ChainId.RINKEBY]: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  [ChainId.GÖRLI]: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161\n",
+  [ChainId.KOVAN]: "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
   [ChainId.FANTOM]: "https://rpc.ftm.tools/",
   [ChainId.FANTOM_TESTNET]: "https://rpc.testnet.fantom.network",
   [ChainId.MATIC]: "https://polygon-rpc.com",
@@ -119,7 +110,7 @@ export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.HARMONY_TESTNET]: "https://explorer.pops.one",
   [ChainId.MOONRIVER]: "https://rpc.moonriver.moonbeam.network",
   [ChainId.CRONOS]: "https://evm-cronos.crypto.org",
-  [ChainId.OPTIMISM]: "https://mainnet.optimism.io",
+  [ChainId.OPTIMISM]: "https://rpc.ankr.com/optimism",
   [ChainId.SYSCOIN]: "https://rpc.ankr.com/syscoin",
   [ChainId.METIS]: "https://andromeda.metis.io/?owner=1088",
   [ChainId.MOONBEAM]: "https://rpc.ankr.com/moonbeam",
@@ -133,31 +124,17 @@ export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.CUBE]: "https://http-mainnet.cube.network",
 };
 
-export const PROVIDERS: { [chainId in ChainId]?: JsonRpcProvider } = {
-  [ChainId.ARBITRUM]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.ARBITRUM]
-  ),
-  [ChainId.FANTOM]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.FANTOM]),
-  [ChainId.MATIC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.MATIC]),
-  [ChainId.MOONBEAM]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.MOONBEAM]
-  ),
-  [ChainId.MOONRIVER]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.MOONRIVER]
-  ),
-  [ChainId.AVALANCHE]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.AVALANCHE]
-  ),
-  [ChainId.XDAI]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.XDAI]),
-  [ChainId.HARMONY]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.HARMONY]
-  ),
-  [ChainId.OPTIMISM]: new ethers.providers.JsonRpcProvider(
-    RPCS[ChainId.OPTIMISM]
-  ),
-  [ChainId.BSC]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.BSC]),
-  [ChainId.METIS]: new ethers.providers.JsonRpcProvider(RPCS[ChainId.METIS]),
-};
+const SKIP_RPCS = [ChainId.ROPSTEN, ChainId.GÖRLI, ChainId.RINKEBY, ChainId.KOVAN, ChainId.HARMONY_TESTNET]
+
+export const PROVIDERS =
+  Object.entries(RPCS).reduce((previousValue, currentValue) => {
+    const [curCId, curRpc] = currentValue
+    const chainId = parseInt(curCId) as ChainId
+    if(!SKIP_RPCS.includes(chainId)){
+      previousValue[chainId] = new JsonRpcProvider(curRpc)
+    }
+    return previousValue
+  }, {} as { [chainId in ChainId]?: JsonRpcProvider });
 
 export const MAIFACTORIES: { [chainId in ChainId]?: any } = {
   [ChainId.AVALANCHE]: CrosschainMai__factory,
