@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@qidao/sdk": "5.1.19",
+    "@qidao/sdk": "5.1.20",
     "@ethersproject/keccak256": "5.7.0",
     "@ethersproject/providers": "5.7.0",
     "@ethersproject/strings": "5.7.0",

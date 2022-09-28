@@ -27,7 +27,6 @@ export async function init() {
 
 export async function multicall(chainId: ChainId, calls: any[]) {
   const callProvider = ethcallProvider[chainId];
-  console.log({callProvider, chainId})
   if (callProvider) {
     return await callProvider.all(calls);
   } else {

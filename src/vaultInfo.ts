@@ -90,7 +90,7 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
     const risky = riskyVaults[i];
 
     const collateralAmount =
-      (collateralAmounts[i] as unknown as number) / collateral.token.decimals;
+      (collateralAmounts[i] as unknown as number) / (10 ** collateral.token.decimals);
     const debt = (debtAmounts[i] as unknown as number) / 1e18;
     const contract = vaultContract;
     let cdr = (collateralAmount * collateralPrice) / debt;
