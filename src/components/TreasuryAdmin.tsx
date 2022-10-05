@@ -1,6 +1,7 @@
 import { MetaTransactionData } from "@gnosis.pm/safe-core-sdk-types";
 import * as MUI from "@mui/material";
 import { Erc20Stablecoin } from "@qidao/sdk";
+import { ethers } from "ethers";
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Datagrid,
@@ -105,6 +106,8 @@ const EditiableRow = (
 };
 
 const TreasuryAdmin = () => {
+  const chainId = useChainId();
+
   const {
     data,
     isLoading,
@@ -114,7 +117,7 @@ const TreasuryAdmin = () => {
     isLoading?: boolean;
     pageInfo?: { hasNextPage?: boolean; hasPreviousPage?: boolean };
   } = useGetList("vaults", {
-    filter: { vaultIdx: 0 },
+    filter: { vaultIdx: 0, chainId: chainId },
     pagination: {
       page: 1,
       perPage: 5000,
@@ -124,7 +127,6 @@ const TreasuryAdmin = () => {
   // const [safeSdk, setSafeSdk] = useState<Safe>();
   // const [safeService, setSafeService] = useState<SafeServiceClient>();
   let metamaskProvider = useProvider();
-  const chainId = useChainId();
   const [vaults, setVaults] = useState(data);
   useEffect(() => {
     const a = async () => {
@@ -148,14 +150,17 @@ const TreasuryAdmin = () => {
         );
 
         try {
-          const collateralAmount = await vaultContract.vaultCollateral(
-            vault.vaultIdx
-          );
+          // const collateralAmount = await vaultContract.vaultCollateral(
+          //   vault.vaultIdx
+          // );
           const foo = await (
             vaultContract as Erc20Stablecoin
           ).populateTransaction.withdrawCollateral(
             vault.vaultIdx,
-            collateralAmount
+            ethers.utils.parseUnits(
+              vault.collateral.toString(),
+              vault.token.decimals
+            )
           );
           // const foo = vaultContract.populateTransaction.withdrawCollateral( );
 
@@ -170,6 +175,7 @@ const TreasuryAdmin = () => {
         }
       } else return;
     });
+
     if (vaultWithdrawTxs) {
       const vaultTxs = (await Promise.all(vaultWithdrawTxs)).filter(
         (item): item is MetaTransactionData => !!item

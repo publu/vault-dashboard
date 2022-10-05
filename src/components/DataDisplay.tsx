@@ -30,18 +30,18 @@ const fetchVaults = (
     await init();
 
     const chainIds = [
-      // ChainId.MAINNET,
+      ChainId.MAINNET,
       ChainId.MATIC,
-      // ChainId.FANTOM,
-      // ChainId.AVALANCHE,
-      // ChainId.ARBITRUM,
-      // ChainId.MOONRIVER,
-      // ChainId.HARMONY,
-      // ChainId.XDAI,
-      // ChainId.OPTIMISM,
-      // ChainId.BSC,
-      // ChainId.MOONBEAM,
-      // ChainId.METIS,
+      ChainId.FANTOM,
+      ChainId.AVALANCHE,
+      ChainId.ARBITRUM,
+      ChainId.MOONRIVER,
+      ChainId.HARMONY,
+      ChainId.XDAI,
+      ChainId.OPTIMISM,
+      ChainId.BSC,
+      ChainId.MOONBEAM,
+      ChainId.METIS,
     ];
     const vaultInfoPromises = chainIds
       .flatMap((chainId) => {
