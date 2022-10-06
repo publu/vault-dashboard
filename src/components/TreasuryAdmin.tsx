@@ -1,5 +1,7 @@
 import { MetaTransactionData } from "@gnosis.pm/safe-core-sdk-types";
+import DeleteIcon from "@mui/icons-material/Delete";
 import * as MUI from "@mui/material";
+import { Button } from "@mui/material";
 import { ChainId, Erc20Stablecoin } from "@qidao/sdk";
 import { ethers } from "ethers";
 import React, { Dispatch, useEffect, useState } from "react";
@@ -10,7 +12,9 @@ import {
   TextFieldProps,
   useGetList,
   useList,
+  useListContext,
   useRecordContext,
+  useUnselect,
 } from "react-admin";
 import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
@@ -144,9 +148,36 @@ const ChainSelector: React.FC<{
   );
 };
 
+const PostBulkActionButtons = (props: {
+  vaults: RAVaultInfoAnyVersion[];
+  setVaults: Dispatch<
+    React.SetStateAction<RAVaultInfoAnyVersion[] | undefined>
+  >;
+}) => {
+  const { selectedIds, resource } = useListContext();
+  const unselect = useUnselect(resource);
+
+  console.log({ selectedIds });
+  const deleteVaults = () => {
+    const trimmedVaults = props.vaults.filter((v) => {
+      return !selectedIds.includes(v.id);
+    });
+    props.setVaults(trimmedVaults);
+    unselect(selectedIds);
+  };
+
+  return (
+    <React.Fragment>
+      <Button onClick={() => deleteVaults()}>
+        <DeleteIcon />
+        Delete
+      </Button>
+    </React.Fragment>
+  );
+};
+
 const TreasuryAdmin = () => {
   const [selectedChainId, setSelectedChainId] = useState(ChainId.MATIC);
-  console.log({ selectedChainId });
   const {
     data,
   }: {
@@ -257,7 +288,14 @@ const TreasuryAdmin = () => {
           setSelectedChainId={setSelectedChainId}
         />
         <ListContextProvider value={listContext}>
-          <Datagrid>
+          <Datagrid
+            bulkActionButtons={
+              <PostBulkActionButtons
+                vaults={vaults || []}
+                setVaults={setVaults}
+              />
+            }
+          >
             <TextField source="vaultIdx" />
             <TextField source="chainId" />
             <TextField source="id" />
