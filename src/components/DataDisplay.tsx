@@ -1,4 +1,5 @@
-import { ChainId, COLLATERALS } from "@qidao/sdk";
+import { ChainId, COLLATERAL, COLLATERAL_V2, COLLATERALS } from "@qidao/sdk";
+import { Contract } from "ethers-multicall";
 import fakeDataProvider from "ra-data-fakerest";
 import React, { useLayoutEffect } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   useNotify,
 } from "react-admin";
 import { BrowserRouter, Route } from "react-router-dom";
+import { ChainName } from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
@@ -59,7 +61,7 @@ const fetchVaults = (
               `Fetching: ${contractMeta.shortName} on ${contractMeta.chainId}`
             );
             const vaults = await fetchVaultInfo(contractMeta);
-            vaults.forEach((v) => {
+            for (const v of vaults) {
               if (
                 addedVaults.has(
                   JSON.stringify(v, [
@@ -84,9 +86,20 @@ const fetchVaults = (
                     "risky",
                   ])
                 );
-                dataProvider.create("vaults", { data: v });
+                try {
+                  await dataProvider.create("vaults", { data: v });
+                } catch (e) {
+                  if (v.vaultIdx === 0) {
+                    await dataProvider.update("vaults", {
+                      id: v.id,
+                      data: v,
+                      previousData: generateEmptyVault(v),
+                    });
+                  }
+                  console.warn({ e });
+                }
               }
-            });
+            }
             notify(
               `Fetched: ${contractMeta.token.name} on ${contractMeta.chainId}`
             );
@@ -114,9 +127,39 @@ const fetchVaults = (
   void effect();
 };
 
+function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2) {
+  const vaultChainName = ChainName[c.chainId];
+  const vaultLink =
+    "https://app.mai.finance/vaults/" +
+    c.chainId.toString() +
+    "/" +
+    c.shortName +
+    "/0";
+  const contract = new Contract(c.vaultAddress, c.contractAbi);
+  return {
+    ...c,
+    id: `${c.chainId}-${c.token.symbol}-${0}`,
+    vaultIdx: 0,
+    tokenName: c.token.name,
+    owner: "",
+    cdr: Infinity,
+    collateral: 0,
+    debt: 0,
+    contract,
+    chainId: c.chainId,
+    vaultChainName,
+    vaultLink,
+    risky: false,
+  };
+}
+
 const DataDisplay: React.FC = () => {
   const dataProvider = fakeDataProvider({
-    vaults: [],
+    vaults: Object.values(COLLATERALS)
+      .flat()
+      .flatMap((c) => {
+        return generateEmptyVault(c);
+      }),
   });
   const notify = useNotify();
   useLayoutEffect(

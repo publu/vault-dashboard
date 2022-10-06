@@ -1,12 +1,13 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
-import {ChainId, COLLATERAL, COLLATERAL_V2 } from "@qidao/sdk";
+import { ChainId, COLLATERAL, COLLATERAL_V2 } from "@qidao/sdk";
 import { Contract } from "ethers-multicall";
 import _ from "lodash";
-import { RPCS, ChainName } from "./constants";
+import { ChainName, RPCS } from "./constants";
 import { ERC20__factory } from "./contracts";
 import { multicall } from "./multicall";
 
 export interface VaultInfo extends COLLATERAL {
+  id: string | number;
   owner: string;
   tokenName: string;
   cdr: number;
@@ -20,7 +21,9 @@ export interface VaultInfo extends COLLATERAL {
   risky: number;
 }
 
-export interface VaultInfoV2 extends Omit<VaultInfo, 'version'>, COLLATERAL_V2{ }
+export interface VaultInfoV2
+  extends Omit<VaultInfo, "version">,
+    COLLATERAL_V2 {}
 
 export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
   const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId]);
@@ -90,13 +93,15 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
     const risky = riskyVaults[i];
 
     const collateralAmount =
-      (collateralAmounts[i] as unknown as number) / (10 ** collateral.token.decimals);
+      (collateralAmounts[i] as unknown as number) /
+      10 ** collateral.token.decimals;
     const debt = (debtAmounts[i] as unknown as number) / 1e18;
     const contract = vaultContract;
     let cdr = (collateralAmount * collateralPrice) / debt;
     cdr = isNaN(cdr) ? 0 : cdr;
     vaultInfo.push({
       ...collateral,
+      id: `${collateral.chainId}-${collateral.token.symbol}-${vaultIdx}`,
       vaultIdx,
       tokenName,
       owner,
