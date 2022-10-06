@@ -47,7 +47,9 @@ const fetchVaults = (
     ];
     const vaultInfoPromises = chainIds
       .flatMap((chainId) => {
-        const contracts = COLLATERALS[chainId]?.filter((c) => !c.disabled);
+        const contracts = COLLATERALS[chainId]?.filter(
+          (c) => !c.disabled && c.shortName !== "matic"
+        );
         if (contracts)
           return contracts.map((c) => {
             return { ...c };
@@ -157,6 +159,7 @@ const DataDisplay: React.FC = () => {
   const dataProvider = fakeDataProvider({
     vaults: Object.values(COLLATERALS)
       .flat()
+      .filter((c) => !c.disabled && c.shortName !== "matic")
       .flatMap((c) => {
         return generateEmptyVault(c);
       }),
