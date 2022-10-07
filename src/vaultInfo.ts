@@ -5,13 +5,14 @@ import _ from "lodash";
 import { ChainName, RPCS } from "./constants";
 import { ERC20__factory } from "./contracts";
 import { multicall } from "./multicall";
+import { getId } from "./utils/utils";
 
 export interface VaultInfo extends COLLATERAL {
   id: string | number;
   owner: string;
   tokenName: string;
   cdr: number;
-  collateral: number;
+  depositedCollateralAmount: number;
   debt: number;
   vaultIdx: number;
   contract: Contract;
@@ -31,9 +32,9 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
     collateral.vaultAddress,
     collateral.contractAbi
   );
-    const totalSupplyCall = vaultContract.vaultCount() // because totalSupply isn't all-encompassing.
-    const collateralPriceCall = vaultContract.getEthPriceSource()
-    const collateralAddressCall = vaultContract.collateral()
+  const totalSupplyCall = vaultContract.vaultCount(); // because totalSupply isn't all-encompassing.
+  const collateralPriceCall = vaultContract.getEthPriceSource();
+  const collateralAddressCall = vaultContract.collateral();
 
   let [totalSupply, collateralPrice, collateralAddress] = await multicall(
     collateral.chainId,
@@ -101,12 +102,12 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
     cdr = isNaN(cdr) ? 0 : cdr;
     vaultInfo.push({
       ...collateral,
-      id: `${collateral.chainId}-${collateral.token.symbol}-${vaultIdx}`,
+      id: getId(collateral, vaultIdx),
       vaultIdx,
       tokenName,
       owner,
       cdr,
-      collateral: collateralAmount,
+      depositedCollateralAmount: collateralAmount,
       debt,
       contract,
       chainId: collateral.chainId,

@@ -2,15 +2,21 @@ import { MetaTransactionData } from "@gnosis.pm/safe-core-sdk-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as MUI from "@mui/material";
 import { Button } from "@mui/material";
-import { ChainId, Erc20Stablecoin } from "@qidao/sdk";
+import {
+  ChainId,
+  COLLATERAL,
+  COLLATERAL_V2,
+  COLLATERALS,
+  Erc20Stablecoin,
+} from "@qidao/sdk";
 import { ethers } from "ethers";
+import { Contract } from "ethers-multicall";
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Datagrid,
   ListContextProvider,
   TextField,
   TextFieldProps,
-  useGetList,
   useList,
   useListContext,
   useRecordContext,
@@ -18,7 +24,8 @@ import {
 } from "react-admin";
 import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
-import { RAVaultInfoAnyVersion } from "../types";
+import { init, multicall } from "../multicall";
+import { getId } from "../utils/utils";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
 // const transactionServiceUrl = "https://safe-transaction.gnosis.io/"; // on rinkeby testnet
@@ -75,18 +82,22 @@ const saveTemplateAsFile = (filename: string, dataObjToWrite: Object) => {
 
 const EditiableRow = (
   props: TextFieldProps & {
-    vaults: RAVaultInfoAnyVersion[];
-    setVaults: Dispatch<
-      React.SetStateAction<RAVaultInfoAnyVersion[] | undefined>
-    >;
+    vaults: TreasuryManagementVaultData[];
+    setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>;
+    source: string;
   }
 ) => {
   const [editMode, setEditMode] = useState(false);
-  const foo: RAVaultInfoAnyVersion = useRecordContext(props);
-  const [collateralValue, setCollateralValue] = useState(foo.collateral);
+  const foo: TreasuryManagementVaultData = useRecordContext(props);
+  const [collateralValue, setCollateralValue] = useState(
+    foo.depositedCollateralAmount
+  );
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newInt = parseFloat(event.target.value);
-    const updatedVault = { ...foo, collateral: newInt ? newInt : 0 };
+    const updatedVault = {
+      ...foo,
+      depositedCollateralAmount: newInt ? newInt : 0,
+    };
     const updatedVaults = props.vaults.map((v) =>
       v.id !== updatedVault.id ? v : updatedVault
     );
@@ -104,7 +115,10 @@ const EditiableRow = (
           onBlur={() => setEditMode(!editMode)}
         />
       ) : (
-        <TextField onClick={() => setEditMode(!editMode)} source="collateral" />
+        <TextField
+          onClick={() => setEditMode(!editMode)}
+          source={props.source}
+        />
       )}
     </>
   );
@@ -130,17 +144,16 @@ const ChainSelector: React.FC<{
           setSelectedChainId(cId);
         }}
       >
-        {Object.values(ChainId)
-          .map((chainId) => {
-            let cId: ChainId;
-            if (typeof chainId === "string") cId = parseInt(chainId) as ChainId;
-            else cId = chainId as ChainId;
-            return cId;
+        {Object.keys(COLLATERALS)
+          .map((cId) => {
+            return parseInt(cId) as ChainId;
           })
           .filter((chainId) => !isNaN(chainId))
           .map((chainId) => {
             return (
-              <MUI.MenuItem value={chainId}>{ChainName[chainId]}</MUI.MenuItem>
+              <MUI.MenuItem key={chainId} value={chainId}>
+                {ChainName[chainId]}
+              </MUI.MenuItem>
             );
           })}
       </MUI.Select>
@@ -149,10 +162,8 @@ const ChainSelector: React.FC<{
 };
 
 const PostBulkActionButtons = (props: {
-  vaults: RAVaultInfoAnyVersion[];
-  setVaults: Dispatch<
-    React.SetStateAction<RAVaultInfoAnyVersion[] | undefined>
-  >;
+  vaults: TreasuryManagementVaultData[];
+  setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>;
 }) => {
   const { selectedIds, resource } = useListContext();
   const unselect = useUnselect(resource);
@@ -176,37 +187,59 @@ const PostBulkActionButtons = (props: {
   );
 };
 
+type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2) & {
+  depositedCollateralAmount: number;
+  id: string | number;
+  vaultIdx: number;
+};
+
+const fetchVaultZeroes = async (
+  chainId: ChainId,
+  collaterals: (COLLATERAL | COLLATERAL_V2)[]
+) => {
+  await init();
+  const VAULT_IDX = 0;
+  //TODO make the ordering link between collaterals and calls more explict
+  const depositedCollateralCalls = collaterals.map((c) => {
+    const vaultContract = new Contract(c.vaultAddress, c.contractAbi);
+    return vaultContract.vaultCollateral(VAULT_IDX);
+  });
+
+  const depositedCollaterals = await multicall(
+    chainId,
+    depositedCollateralCalls
+  );
+  return collaterals.map((c, i) => {
+    const depositedCollateralAmount =
+      (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals;
+    return {
+      ...c,
+      depositedCollateralAmount,
+      id: getId(c, VAULT_IDX),
+      vaultIdx: VAULT_IDX,
+    };
+  });
+};
+
 const TreasuryAdmin = () => {
   const [selectedChainId, setSelectedChainId] = useState(ChainId.MATIC);
-  const {
-    data,
-  }: {
-    data?: RAVaultInfoAnyVersion[];
-    total?: number;
-    isLoading?: boolean;
-    pageInfo?: { hasNextPage?: boolean; hasPreviousPage?: boolean };
-  } = useGetList("vaults", {
-    filter: { vaultIdx: 0 },
-    pagination: {
-      page: 1,
-      perPage: 5000,
-    },
-  });
 
   // const [safeSdk, setSafeSdk] = useState<Safe>();
   // const [safeService, setSafeService] = useState<SafeServiceClient>();
   let metamaskProvider = useProvider();
-  const [vaults, setVaults] = useState(data);
+  const [vaults, setVaults] = useState<TreasuryManagementVaultData[]>([]);
   useEffect(() => {
-    const a = async () => {
-      if (metamaskProvider) {
-        // const { safeService, safeSdk } = await setupSafe(metamaskProvider);
-        // setSafeSdk(safeSdk);
-        // setSafeService(safeService);
-      }
+    const fetchAllChainsVaultZeros = async () => {
+      const vaultZeros = await Promise.all(
+        Object.keys(COLLATERALS).map((cId) => {
+          const chainId = parseInt(cId) as ChainId;
+          return fetchVaultZeroes(chainId, COLLATERALS[chainId] || []);
+        })
+      );
+      setVaults(vaultZeros.flat());
     };
-    void a();
-  }, [metamaskProvider]);
+    void fetchAllChainsVaultZeros();
+  }, []);
 
   type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
@@ -231,7 +264,7 @@ const TreasuryAdmin = () => {
             ).populateTransaction.withdrawCollateral(
               vault.vaultIdx,
               ethers.utils.parseUnits(
-                vault.collateral.toString(),
+                vault.depositedCollateralAmount.toString(),
                 vault.token.decimals
               )
             );
@@ -297,9 +330,12 @@ const TreasuryAdmin = () => {
             }
           >
             <TextField source="vaultIdx" />
-            <TextField source="chainId" />
             <TextField source="id" />
-            <EditiableRow vaults={vaults || []} setVaults={setVaults} />
+            <EditiableRow
+              source="depositedCollateralAmount"
+              vaults={vaults || []}
+              setVaults={setVaults}
+            />
             <TextField source="token.name" />
           </Datagrid>
         </ListContextProvider>
