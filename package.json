@@ -30,6 +30,7 @@
     "ethers": "5.7.1",
     "ethers-multicall": "^0.2.3",
     "lodash": "^4.17.21",
+    "p-queue": "^7.3.0",
     "prop-types": "^15.8.1",
     "ra-data-fakerest": "^4.0.4",
     "ra-data-json-server": "^4.0.4",
