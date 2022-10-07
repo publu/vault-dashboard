@@ -1,80 +1,120 @@
-import {JsonFragment} from '@ethersproject/abi'
-import {JsonRpcProvider} from '@ethersproject/providers'
-import {Contract} from 'ethers-multicall'
-import _ from 'lodash'
-import {ChainIdKey, RPCS, ChainName} from './constants'
-import {ERC20__factory} from './contracts'
-import {multicall} from './multicall'
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { ChainId, COLLATERAL, COLLATERAL_V2 } from "@qidao/sdk";
+import { Contract } from "ethers-multicall";
+import _ from "lodash";
+import { ChainName, RPCS } from "./constants";
+import { ERC20__factory } from "./contracts";
+import { multicall } from "./multicall";
+import { getId } from "./utils/utils";
 
-export interface VaultInfo {
-    owner: string;
-    tokenName: string
-    cdr: number;
-    collateral: number;
-    debt: number;
-    vaultIdx: number
-    contract: Contract
-    chainId: ChainIdKey
-    vaultChainName: string
-    vaultFactory: any
-    vaultLink: string
-    slug: string
-    risky: number;
+export interface VaultInfo extends COLLATERAL {
+  id: string | number;
+  owner: string;
+  tokenName: string;
+  cdr: number;
+  depositedCollateralAmount: number;
+  debt: number;
+  vaultIdx: number;
+  contract: Contract;
+  chainId: ChainId;
+  vaultChainName: string;
+  vaultLink: string;
+  risky: number;
 }
 
-export async function fetchVaultInfo(chainId: ChainIdKey, contractAddress: string, abi: JsonFragment[], decimals = 1e18, factory: any, slug: string) {
-    const ethersProvider = new JsonRpcProvider(RPCS[chainId])
-    const vaultContract = new Contract(contractAddress, abi)
+export interface VaultInfoV2
+  extends Omit<VaultInfo, "version">,
+    COLLATERAL_V2 {}
 
-    const totalSupplyCall = vaultContract.vaultCount() // because totalSupply isn't all-encompassing.
-    const collateralPriceCall = vaultContract.getEthPriceSource()
-    const collateralAddressCall = vaultContract.collateral()
+export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
+  const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId]);
+  const vaultContract = new Contract(
+    collateral.vaultAddress,
+    collateral.contractAbi
+  );
+  const totalSupplyCall = vaultContract.vaultCount(); // because totalSupply isn't all-encompassing.
+  const collateralPriceCall = vaultContract.getEthPriceSource();
+  const collateralAddressCall = vaultContract.collateral();
 
-    let [totalSupply, collateralPrice, collateralAddress] = await multicall(chainId, [
-        totalSupplyCall,
-        collateralPriceCall,
-        collateralAddressCall,
-    ])
+  let [totalSupply, collateralPrice, collateralAddress] = await multicall(
+    collateral.chainId,
+    [totalSupplyCall, collateralPriceCall, collateralAddressCall]
+  );
 
-    totalSupply = totalSupply.toNumber()
-    collateralPrice = (collateralPrice as unknown as number) / 1e8
+  totalSupply = totalSupply.toNumber();
+  collateralPrice = (collateralPrice as unknown as number) / 1e8;
 
-    const collateralERC20 = ERC20__factory.connect(collateralAddress, ethersProvider)
-    const tokenName = await collateralERC20.symbol()
-    // const tokenDecimals = await collateralERC20.decimals()
-    const limitToFetch = totalSupply
-    const existsCalls = _.range(limitToFetch).map((i) => vaultContract.exists(i))
+  const collateralERC20 = ERC20__factory.connect(
+    collateralAddress,
+    ethersProvider
+  );
+  const tokenName = await collateralERC20.symbol();
+  // const tokenDecimals = await collateralERC20.decimals()
+  const limitToFetch = totalSupply;
+  const existsCalls = _.range(limitToFetch).map((i) => vaultContract.exists(i));
 
-    const vaultsExistCheck: boolean[] = await multicall(chainId, existsCalls)
-    const vaultsToFetch = _.range(limitToFetch).filter((i) => vaultsExistCheck[i])
+  const vaultsExistCheck: boolean[] = await multicall(
+    collateral.chainId,
+    existsCalls
+  );
+  const vaultsToFetch = _.range(limitToFetch).filter(
+    (i) => vaultsExistCheck[i]
+  );
 
-    const collateralCalls = vaultsToFetch.map((i) => vaultContract.vaultCollateral(i))
-    const collateralAmounts = await multicall(chainId, collateralCalls)
-    const debtCalls = vaultsToFetch.map(i => vaultContract.vaultDebt(i))
-    const debtAmounts = await multicall(chainId, debtCalls)
-    const ownerCalls = vaultsToFetch.map(i => vaultContract.ownerOf(i))
-    const owners = await multicall(chainId, ownerCalls)
+  const collateralCalls = vaultsToFetch.map((i) =>
+    vaultContract.vaultCollateral(i)
+  );
+  const collateralAmounts = await multicall(
+    collateral.chainId,
+    collateralCalls
+  );
+  const debtCalls = vaultsToFetch.map((i) => vaultContract.vaultDebt(i));
+  const debtAmounts = await multicall(collateral.chainId, debtCalls);
+  const ownerCalls = vaultsToFetch.map((i) => vaultContract.ownerOf(i));
+  const owners = await multicall(collateral.chainId, ownerCalls);
 
-    const riskyCalls = vaultsToFetch.map(i => vaultContract.checkLiquidation(i))
-    const riskyVaults = await multicall(chainId, riskyCalls)
+  const riskyCalls = vaultsToFetch.map((i) =>
+    vaultContract.checkLiquidation(i)
+  );
+  const riskyVaults = await multicall(collateral.chainId, riskyCalls);
 
-    const vaultChainName = ChainName[chainId]
-    const vaultFactory = factory
+  const vaultChainName = ChainName[collateral.chainId];
+  const vaultInfo: (VaultInfo | VaultInfoV2)[] = [];
 
-    const vaultInfo: VaultInfo[] = []
+  for (let i = 0; i < vaultsToFetch.length; i++) {
+    const vaultIdx = vaultsToFetch[i];
+    const vaultLink =
+      "https://app.mai.finance/vaults/" +
+      collateral.chainId.toString() +
+      "/" +
+      collateral.shortName +
+      "/" +
+      vaultIdx.toString();
+    const owner = owners[i];
+    const risky = riskyVaults[i];
 
-    for (let i = 0; i < vaultsToFetch.length; i++) {
-        const vaultIdx = vaultsToFetch[i]
-        const vaultLink = "https://app.mai.finance/vaults/"+chainId.toString()+"/"+slug+"/"+vaultIdx.toString()
-        const owner = owners[i]
-        const risky = riskyVaults[i]
-
-        const collateral = collateralAmounts[i] as unknown as number / decimals
-        const debt = debtAmounts[i] as unknown as number / 1e18
-        const contract  = vaultContract
-        let cdr = collateral * collateralPrice / debt
-        cdr = isNaN(cdr) ? 0 : cdr
-        vaultInfo.push({ vaultIdx, tokenName, owner, cdr, collateral, debt, contract, chainId, vaultChainName, vaultFactory, vaultLink, risky, slug })
-    }
-    return vaultInfo
+    const collateralAmount =
+      (collateralAmounts[i] as unknown as number) /
+      10 ** collateral.token.decimals;
+    const debt = (debtAmounts[i] as unknown as number) / 1e18;
+    const contract = vaultContract;
+    let cdr = (collateralAmount * collateralPrice) / debt;
+    cdr = isNaN(cdr) ? 0 : cdr;
+    vaultInfo.push({
+      ...collateral,
+      id: getId(collateral, vaultIdx),
+      vaultIdx,
+      tokenName,
+      owner,
+      cdr,
+      depositedCollateralAmount: collateralAmount,
+      debt,
+      contract,
+      chainId: collateral.chainId,
+      vaultChainName,
+      vaultLink,
+      risky,
+    });
+  }
+  return vaultInfo;
 }
