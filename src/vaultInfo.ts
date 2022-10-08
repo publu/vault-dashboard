@@ -2,7 +2,7 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { ChainId, COLLATERAL, COLLATERAL_V2 } from "@qidao/sdk";
 import { Contract } from "ethers-multicall";
 import _ from "lodash";
-import { ChainName, RPCS } from "./constants";
+import { ChainName, MANHATTAN_COLLATERAL, RPCS } from "./constants";
 import { ERC20__factory } from "./contracts";
 import { multicall } from "./multicall";
 import { getId } from "./utils/utils";
@@ -26,7 +26,13 @@ export interface VaultInfoV2
   extends Omit<VaultInfo, "version">,
     COLLATERAL_V2 {}
 
-export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
+export interface VaultInfoManhattan
+  extends Omit<VaultInfoV2, "shortName">,
+    MANHATTAN_COLLATERAL {}
+
+export async function fetchVaultInfo(
+  collateral: COLLATERAL | COLLATERAL_V2 | MANHATTAN_COLLATERAL
+) {
   const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId]);
   const vaultContract = new Contract(
     collateral.vaultAddress,
@@ -79,7 +85,7 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2) {
   const riskyVaults = await multicall(collateral.chainId, riskyCalls);
 
   const vaultChainName = ChainName[collateral.chainId];
-  const vaultInfo: (VaultInfo | VaultInfoV2)[] = [];
+  const vaultInfo: (VaultInfo | VaultInfoV2 | VaultInfoManhattan)[] = [];
 
   for (let i = 0; i < vaultsToFetch.length; i++) {
     const vaultIdx = vaultsToFetch[i];

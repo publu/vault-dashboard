@@ -11,7 +11,11 @@ import {
   useNotify,
 } from "react-admin";
 import { BrowserRouter, Route } from "react-router-dom";
-import { ChainName } from "../constants";
+import {
+  ChainName,
+  MANHATTAN_COLLATERAL,
+  MANHATTAN_COLLATERALS,
+} from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
@@ -47,9 +51,15 @@ const fetchVaults = (
     ];
     const vaultInfoPromises = chainIds
       .flatMap((chainId) => {
-        const contracts = COLLATERALS[chainId]?.filter(
+        const qiDaoContracts = COLLATERALS[chainId]?.filter(
           (c) => !c.disabled && c.shortName !== "matic"
         );
+
+        const contracts = [
+          ...(qiDaoContracts || []),
+          ...(MANHATTAN_COLLATERALS[chainId] || []),
+        ];
+
         if (contracts)
           return contracts.map((c) => {
             return { ...c };
@@ -129,7 +139,9 @@ const fetchVaults = (
   void effect();
 };
 
-function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2) {
+function generateEmptyVault(
+  c: COLLATERAL | COLLATERAL_V2 | MANHATTAN_COLLATERAL
+) {
   const vaultChainName = ChainName[c.chainId];
   const vaultLink =
     "https://app.mai.finance/vaults/" +
@@ -157,12 +169,7 @@ function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2) {
 
 const DataDisplay: React.FC = () => {
   const dataProvider = fakeDataProvider({
-    vaults: Object.values(COLLATERALS)
-      .flat()
-      .filter((c) => !c.disabled && c.shortName !== "matic")
-      .flatMap((c) => {
-        return generateEmptyVault(c);
-      }),
+    vaults: [],
   });
   const notify = useNotify();
   useLayoutEffect(

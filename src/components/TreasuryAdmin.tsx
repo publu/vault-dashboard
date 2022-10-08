@@ -23,7 +23,7 @@ import {
   useUnselect,
 } from "react-admin";
 import { useProvider } from "../Connectors/Metamask";
-import { ChainName } from "../constants";
+import { ChainName, MANHATTAN_COLLATERAL } from "../constants";
 import { init, multicall } from "../multicall";
 import { getId } from "../utils/utils";
 
@@ -187,7 +187,11 @@ const PostBulkActionButtons = (props: {
   );
 };
 
-type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2) & {
+type TreasuryManagementVaultData = (
+  | COLLATERAL
+  | COLLATERAL_V2
+  | MANHATTAN_COLLATERAL
+) & {
   depositedCollateralAmount: number;
   id: string | number;
   vaultIdx: number;
@@ -195,7 +199,7 @@ type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2) & {
 
 const fetchVaultZeroes = async (
   chainId: ChainId,
-  collaterals: (COLLATERAL | COLLATERAL_V2)[]
+  collaterals: (COLLATERAL | COLLATERAL_V2 | MANHATTAN_COLLATERAL)[]
 ) => {
   await init();
   const VAULT_IDX = 0;
