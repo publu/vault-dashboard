@@ -1,3 +1,4 @@
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Box, TextField } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { DateTimePicker } from "@mui/x-date-pickers";
@@ -8,8 +9,8 @@ import {
   isGaugeValid,
 } from "@qidao/sdk";
 import snapshot from "@snapshot-labs/snapshot.js";
-import { getUnixTime } from "date-fns/fp"; // Grid version 2
-import React, { useEffect } from "react";
+import { addDays, getUnixTime } from "date-fns/fp"; // Grid version 2
+import React, { useState } from "react";
 import { useAccount, useProvider } from "../Connectors/Metamask";
 import CheckboxList from "./CheckBoxList";
 
@@ -17,7 +18,11 @@ const hub = "https://hub.snapshot.org"; // or https://testnet.snapshot.org for t
 const client = new snapshot.Client712(hub);
 
 export default function SnapshotProposal() {
-  const [value, setValue] = React.useState(
+  const [snapshotTitle, setSnapshotTitle] = React.useState(
+    "QIP###: Vault Incentives Gauge (Round ##)"
+  );
+
+  const [snapshotProposalText, setSnapshotProposalText] = React.useState(
     `Vault incentives are allocated a total of 150k Qi per week. Following QIP047 & QIP162 the distribution of these rewards among vault types will be decided every two weeks by the DAO.
 
 To vote, you must hold Qi. You can distribute your voting power among as many and as few collateral types as you wish. The aggregate distribution of responses will be used to calculate the final distribution of rewards.
@@ -33,57 +38,52 @@ Note: Qi holders will be able to vote from any chain that has QI.
 `
   );
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
+    setSnapshotProposalText(event.target.value);
   };
   const choices = Object.values(COLLATERALS).flat().filter(isGaugeValid);
 
   const [checked, setChecked] =
-    React.useState<(GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2)[]>(
-      choices
-    );
-  const [startDateTime, setStartDateTime] = React.useState<Date | null>(
-    new Date()
+    useState<(GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2)[]>(choices);
+  const [startDateTime, setStartDateTime] = useState<Date | null>(new Date());
+  const [endDateTime, setEndDateTime] = useState<Date | null>(
+    addDays(3, new Date())
   );
-  const [endDateTime, setEndDateTime] = React.useState<Date | null>(new Date());
-  // console.log(parse(startDateTime || ""));
+  const [titleError, setTitleError] = useState(true);
+  // const [startTimeError, setStartTimeError] = useState(false);
+  // const [endTimeError, setEndTimeError] = useState(false);
+  const [submissionMade, setSubmissionMade] = useState(false);
   let metamaskProvider = useProvider("any");
   let account = useAccount();
-  useEffect(() => {
-    metamaskProvider?.getBlockNumber().then((bn) => {
-      console.log({
-        startDateTime,
-        endDateTime,
-        bn,
-      });
-    });
-  }, [endDateTime, metamaskProvider, startDateTime]);
-
   const submitProposal = async () => {
     if (metamaskProvider && account && startDateTime && endDateTime) {
       const blockNumber = metamaskProvider.blockNumber;
-      const receipt = await client.proposal(metamaskProvider, account, {
-        discussion: "https://discord.gg/qidaoprotocol",
-        space: "qidao.eth",
-        type: "weighted",
-        title: "QIP165: Vault Incentives Gauge (Round 21)",
-        body: value,
-        choices: choices.map((c) => c.snapshotName),
-        start: getUnixTime(startDateTime),
-        end: getUnixTime(endDateTime),
-        snapshot: blockNumber,
-        plugins: JSON.stringify({}),
-        app: "snapshot",
-      });
+      setSubmissionMade(true);
+      try {
+        const receipt = await client.proposal(metamaskProvider, account, {
+          discussion: "https://discord.gg/qidaoprotocol",
+          space: "qidao.eth",
+          type: "weighted",
+          title: "QIP165: Vault Incentives Gauge (Round 21)",
+          body: snapshotProposalText,
+          choices: choices.map((c) => c.snapshotName),
+          start: getUnixTime(startDateTime),
+          end: getUnixTime(endDateTime),
+          snapshot: blockNumber,
+          plugins: JSON.stringify({}),
+          app: "snapshot",
+        });
+        console.log(`Successful Submission`, receipt);
+      } catch (e: any) {
+        console.warn(`Error in submission`, e);
+      } finally {
+        setSubmissionMade(false);
+      }
     }
   };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={0} style={{ minHeight: "100%" }}>
-        {/*<Grid xs={12}>*/}
-        {/*  <div>Todo Add Title input</div>*/}
-        {/*</Grid>*/}
-
         <Grid xs={4}>
           <CheckboxList
             choices={choices}
@@ -92,30 +92,52 @@ Note: Qi holders will be able to vote from any chain that has QI.
           />
         </Grid>
         <Grid container xs={8} style={{ maxHeight: "700px" }}>
-          <Grid xs={12}>
-            <Box
-              component="form"
-              sx={{
-                "& .MuiTextField-root": { m: 1, width: "70ch" },
+          <Grid
+            xs={9}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <TextField
+              error={titleError}
+              id="outlined-basic"
+              label="Proposal Title"
+              value={snapshotTitle}
+              onChange={(e) => {
+                if (e.target.value.includes("#")) setTitleError(true);
+                else setTitleError(false);
+                setSnapshotTitle(e.target.value);
               }}
-              noValidate
-              autoComplete="off"
-            >
-              <TextField
-                id="standard-multiline-flexible"
-                label="Proposal Text"
-                multiline
-                value={value}
-                onChange={handleChange}
-                variant="outlined"
-              />
-            </Box>
+              variant="outlined"
+              fullWidth
+            />
           </Grid>
-          <Grid xs={4}>
+          <Grid
+            xs={3}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <LoadingButton
+              disabled={titleError || submissionMade}
+              loading={submissionMade}
+              variant="contained"
+              onClick={submitProposal}
+            >
+              Submit
+            </LoadingButton>
+          </Grid>
+
+          <Grid
+            xs={6}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
             <DateTimePicker
               renderInput={(props) => <TextField {...props} />}
               label="Start Time"
-              minDateTime={new Date()}
+              disablePast
               value={startDateTime}
               onChange={(newValue) => {
                 setStartDateTime(newValue);
@@ -123,7 +145,12 @@ Note: Qi holders will be able to vote from any chain that has QI.
             />
           </Grid>
 
-          <Grid xs={4}>
+          <Grid
+            xs={6}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
             <DateTimePicker
               renderInput={(props) => <TextField {...props} />}
               label="End Time"
@@ -133,6 +160,26 @@ Note: Qi holders will be able to vote from any chain that has QI.
                 setEndDateTime(newValue);
               }}
             />
+          </Grid>
+          <Grid xs={12}>
+            <Box
+              component="form"
+              // sx={{
+              //   "& .MuiTextField-root": { m: 1, width: "70ch" },
+              // }}
+              noValidate
+              autoComplete="off"
+            >
+              <TextField
+                fullWidth
+                id="standard-multiline-flexible"
+                label="Proposal Text"
+                multiline
+                value={snapshotProposalText}
+                onChange={handleChange}
+                variant="outlined"
+              />
+            </Box>
           </Grid>
         </Grid>
       </Grid>
