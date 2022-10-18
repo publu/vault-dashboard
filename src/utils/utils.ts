@@ -1,7 +1,12 @@
 import { Web3Provider } from "@ethersproject/providers";
-import { ChainId, COLLATERAL, COLLATERAL_V2 } from "@qidao/sdk";
+import {
+  ChainId,
+  COLLATERAL,
+  COLLATERAL_V2,
+  GAUGE_VALID_COLLATERAL,
+  GAUGE_VALID_COLLATERAL_V2,
+} from "@qidao/sdk";
 import { BigNumberish, ethers } from "ethers";
-import { MANHATTAN_COLLATERAL } from "../constants";
 
 export const formatAmount = (amount: BigNumberish) => {
   let floatNumber = 18;
@@ -184,7 +189,11 @@ export async function addOrSwapChain(
 }
 
 export function getId(
-  collateral: COLLATERAL | COLLATERAL_V2 | MANHATTAN_COLLATERAL,
+  collateral:
+    | COLLATERAL
+    | COLLATERAL_V2
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2,
   vaultIdx: number
 ) {
   return `${collateral.chainId}-${collateral.token.symbol}-${vaultIdx}`;

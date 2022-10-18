@@ -11,14 +11,12 @@ import {
 import DashPagination from "./DashPagination";
 import { DeepLinkField } from "./DeepLinkField";
 import LoadingDisplay from "./LoadingDisplay";
-import { NetworkButton } from "./MetaMaskConnectButton";
 import searchFilters from "./Search";
 
 const ListActions = () => (
   <TopToolbar>
     <FilterButton />
     <ExportButton />
-    <NetworkButton title={"Metamask"} />
   </TopToolbar>
 );
 

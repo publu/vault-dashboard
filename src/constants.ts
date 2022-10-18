@@ -1,10 +1,5 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
-import {
-  ChainId,
-  COLLATERAL_V2,
-  StableQiVault__factory,
-  Token,
-} from "@qidao/sdk";
+import { ChainId } from "@qidao/sdk";
 import {
   CrosschainMai__factory,
   EditableERC20__factory,
@@ -169,83 +164,4 @@ export const MAIFACTORIES: { [chainId in ChainId]?: any } = {
   [ChainId.OPTIMISM]: QiStablecoin__factory,
   [ChainId.BSC]: QiStablecoin__factory,
   [ChainId.METIS]: EditableERC20__factory,
-};
-
-export type MANHATTAN_SHORTNAMES = "GLMVT" | "xSMVT" | "STMMVT" | "LSMMVT";
-
-export type MANHATTAN_COLLATERAL = Omit<COLLATERAL_V2, "shortName"> & {
-  shortName: MANHATTAN_SHORTNAMES;
-};
-
-export const MANHATTAN_COLLATERALS: {
-  [c in ChainId]?: MANHATTAN_COLLATERAL[];
-} = {
-  [ChainId.MOONBEAM]: [
-    {
-      connect: StableQiVault__factory.connect,
-      chainId: ChainId.MOONBEAM,
-      minimumCDR: 200,
-      token: new Token(
-        ChainId.MOONBEAM,
-        "0xacc15dc74880c9944775448304b263d191c6077f",
-        18,
-        "WGLMT",
-        "Wrapped GLMR"
-      ),
-      shortName: "GLMVT",
-      vaultAddress: "0x3A82F4da24F93a32dc3C2A28cFA9D6E63EC28531",
-      contractAbi: StableQiVault__factory.abi,
-      version: 2,
-    },
-    {
-      connect: StableQiVault__factory.connect,
-      chainId: ChainId.MOONBEAM,
-      minimumCDR: 250,
-      token: new Token(
-        ChainId.MOONBEAM,
-        "0x06A3b410b681c82417A906993aCeFb91bAB6A080",
-        18,
-        "xStella",
-        "xStella"
-      ),
-      shortName: "xSMVT",
-      vaultAddress: "0x3756465c5b1C1C4cEe473880c9726E20875284f1",
-      contractAbi: StableQiVault__factory.abi,
-      version: 2,
-    },
-  ],
-  [ChainId.MATIC]: [
-    {
-      connect: StableQiVault__factory.connect,
-      chainId: ChainId.MATIC,
-      minimumCDR: 135,
-      token: new Token(
-        ChainId.MATIC,
-        "0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6",
-        18,
-        "MaticX",
-        "Liquid Staking Matic"
-      ),
-      shortName: "LSMMVT",
-      vaultAddress: "0x4b7509ce029656341D0B59D387D9B5312E41615a",
-      contractAbi: StableQiVault__factory.abi,
-      version: 2,
-    },
-    {
-      connect: StableQiVault__factory.connect,
-      chainId: ChainId.MATIC,
-      minimumCDR: 135,
-      token: new Token(
-        ChainId.MATIC,
-        "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4",
-        18,
-        "stMatic",
-        "Staked Matic"
-      ),
-      shortName: "STMMVT",
-      vaultAddress: "0x34fa22892256216a659D4f635354250b4D771458",
-      contractAbi: StableQiVault__factory.abi,
-      version: 2,
-    },
-  ],
 };

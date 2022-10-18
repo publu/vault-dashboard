@@ -1,4 +1,11 @@
-import { ChainId, COLLATERAL, COLLATERAL_V2, COLLATERALS } from "@qidao/sdk";
+import {
+  ChainId,
+  COLLATERAL,
+  COLLATERAL_V2,
+  COLLATERALS,
+  GAUGE_VALID_COLLATERAL,
+  GAUGE_VALID_COLLATERAL_V2,
+} from "@qidao/sdk";
 import { Contract } from "ethers-multicall";
 import fakeDataProvider from "ra-data-fakerest";
 import React, { useLayoutEffect } from "react";
@@ -11,15 +18,12 @@ import {
   useNotify,
 } from "react-admin";
 import { BrowserRouter, Route } from "react-router-dom";
-import {
-  ChainName,
-  MANHATTAN_COLLATERAL,
-  MANHATTAN_COLLATERALS,
-} from "../constants";
+import { ChainName } from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
 import Layout from "./Layout";
+import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultList from "./VaultList";
 
@@ -55,10 +59,7 @@ const fetchVaults = (
           (c) => !c.disabled && c.shortName !== "matic"
         );
 
-        const contracts = [
-          ...(qiDaoContracts || []),
-          ...(MANHATTAN_COLLATERALS[chainId] || []),
-        ];
+        const contracts = [...(qiDaoContracts || [])];
 
         if (contracts)
           return contracts.map((c) => {
@@ -140,7 +141,11 @@ const fetchVaults = (
 };
 
 function generateEmptyVault(
-  c: COLLATERAL | COLLATERAL_V2 | MANHATTAN_COLLATERAL
+  c:
+    | COLLATERAL
+    | COLLATERAL_V2
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2
 ) {
   const vaultChainName = ChainName[c.chainId];
   const vaultLink =
@@ -183,6 +188,7 @@ const DataDisplay: React.FC = () => {
         <Resource name={"vaults"} list={VaultList} />
         <CustomRoutes>
           <Route path="/treasury-admin" element={<TreasuryAdmin />} />
+          <Route path="/snapshot-proposal" element={<SnapshotProposal />} />
         </CustomRoutes>
       </Admin>
     </BrowserRouter>
