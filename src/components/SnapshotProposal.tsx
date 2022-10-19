@@ -63,7 +63,7 @@ Note: Qi holders will be able to vote from any chain that has QI.
           discussion: "https://discord.gg/qidaoprotocol",
           space: "qidao.eth",
           type: "weighted",
-          title: "QIP165: Vault Incentives Gauge (Round 21)",
+          title: snapshotTitle,
           body: snapshotProposalText,
           choices: choices.map((c) => c.snapshotName),
           start: getUnixTime(startDateTime),
