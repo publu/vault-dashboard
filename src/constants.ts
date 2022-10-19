@@ -1,6 +1,10 @@
-import {JsonRpcProvider} from "@ethersproject/providers";
-import {ChainId} from "@qidao/sdk";
-import {CrosschainMai__factory, EditableERC20__factory, QiStablecoin__factory,} from "./contracts/factories";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { ChainId } from "@qidao/sdk";
+import {
+  CrosschainMai__factory,
+  EditableERC20__factory,
+  QiStablecoin__factory,
+} from "./contracts/factories";
 
 export const ChainName: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: "Ethereum",
@@ -90,10 +94,14 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
 export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [ChainId.MAINNET]: "https://rpc.ankr.com/eth",
-  [ChainId.ROPSTEN]: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-  [ChainId.RINKEBY]: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-  [ChainId.GÖRLI]: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161\n",
-  [ChainId.KOVAN]: "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  [ChainId.ROPSTEN]:
+    "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  [ChainId.RINKEBY]:
+    "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  [ChainId.GÖRLI]:
+    "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161\n",
+  [ChainId.KOVAN]:
+    "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
   [ChainId.FANTOM]: "https://rpc.ftm.tools/",
   [ChainId.FANTOM_TESTNET]: "https://rpc.testnet.fantom.network",
   [ChainId.MATIC]: "https://polygon-rpc.com",
@@ -124,17 +132,25 @@ export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.CUBE]: "https://http-mainnet.cube.network",
 };
 
-const SKIP_RPCS = [ChainId.ROPSTEN, ChainId.GÖRLI, ChainId.RINKEBY, ChainId.KOVAN, ChainId.HARMONY_TESTNET]
+const SKIP_RPCS = [
+  ChainId.ROPSTEN,
+  ChainId.GÖRLI,
+  ChainId.RINKEBY,
+  ChainId.KOVAN,
+  ChainId.HARMONY_TESTNET,
+];
 
-export const PROVIDERS =
-  Object.entries(RPCS).reduce((previousValue, currentValue) => {
-    const [curCId, curRpc] = currentValue
-    const chainId = parseInt(curCId) as ChainId
-    if(!SKIP_RPCS.includes(chainId)){
-      previousValue[chainId] = new JsonRpcProvider(curRpc)
+export const PROVIDERS = Object.entries(RPCS).reduce(
+  (previousValue, currentValue) => {
+    const [curCId, curRpc] = currentValue;
+    const chainId = parseInt(curCId) as ChainId;
+    if (!SKIP_RPCS.includes(chainId)) {
+      previousValue[chainId] = new JsonRpcProvider(curRpc);
     }
-    return previousValue
-  }, {} as { [chainId in ChainId]?: JsonRpcProvider });
+    return previousValue;
+  },
+  {} as { [chainId in ChainId]?: JsonRpcProvider }
+);
 
 export const MAIFACTORIES: { [chainId in ChainId]?: any } = {
   [ChainId.AVALANCHE]: CrosschainMai__factory,

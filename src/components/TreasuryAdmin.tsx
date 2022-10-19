@@ -8,6 +8,8 @@ import {
   COLLATERAL_V2,
   COLLATERALS,
   Erc20Stablecoin,
+  GAUGE_VALID_COLLATERAL,
+  GAUGE_VALID_COLLATERAL_V2,
 } from "@qidao/sdk";
 import { ethers } from "ethers";
 import { Contract } from "ethers-multicall";
@@ -187,7 +189,12 @@ const PostBulkActionButtons = (props: {
   );
 };
 
-type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2) & {
+type TreasuryManagementVaultData = (
+  | COLLATERAL
+  | COLLATERAL_V2
+  | GAUGE_VALID_COLLATERAL
+  | GAUGE_VALID_COLLATERAL_V2
+) & {
   depositedCollateralAmount: number;
   id: string | number;
   vaultIdx: number;
@@ -195,7 +202,12 @@ type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2) & {
 
 const fetchVaultZeroes = async (
   chainId: ChainId,
-  collaterals: (COLLATERAL | COLLATERAL_V2)[]
+  collaterals: (
+    | COLLATERAL
+    | COLLATERAL_V2
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2
+  )[]
 ) => {
   await init();
   const VAULT_IDX = 0;

@@ -1,4 +1,11 @@
-import { ChainId, COLLATERAL, COLLATERAL_V2, COLLATERALS } from "@qidao/sdk";
+import {
+  ChainId,
+  COLLATERAL,
+  COLLATERAL_V2,
+  COLLATERALS,
+  GAUGE_VALID_COLLATERAL,
+  GAUGE_VALID_COLLATERAL_V2,
+} from "@qidao/sdk";
 import { Contract } from "ethers-multicall";
 import fakeDataProvider from "ra-data-fakerest";
 import React, { useLayoutEffect } from "react";
@@ -16,6 +23,7 @@ import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
 import Layout from "./Layout";
+import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultList from "./VaultList";
 
@@ -47,9 +55,12 @@ const fetchVaults = (
     ];
     const vaultInfoPromises = chainIds
       .flatMap((chainId) => {
-        const contracts = COLLATERALS[chainId]?.filter(
+        const qiDaoContracts = COLLATERALS[chainId]?.filter(
           (c) => !c.disabled && c.shortName !== "matic"
         );
+
+        const contracts = [...(qiDaoContracts || [])];
+
         if (contracts)
           return contracts.map((c) => {
             return { ...c };
@@ -129,7 +140,13 @@ const fetchVaults = (
   void effect();
 };
 
-function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2) {
+function generateEmptyVault(
+  c:
+    | COLLATERAL
+    | COLLATERAL_V2
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2
+) {
   const vaultChainName = ChainName[c.chainId];
   const vaultLink =
     "https://app.mai.finance/vaults/" +
@@ -157,12 +174,7 @@ function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2) {
 
 const DataDisplay: React.FC = () => {
   const dataProvider = fakeDataProvider({
-    vaults: Object.values(COLLATERALS)
-      .flat()
-      .filter((c) => !c.disabled && c.shortName !== "matic")
-      .flatMap((c) => {
-        return generateEmptyVault(c);
-      }),
+    vaults: [],
   });
   const notify = useNotify();
   useLayoutEffect(
@@ -176,6 +188,7 @@ const DataDisplay: React.FC = () => {
         <Resource name={"vaults"} list={VaultList} />
         <CustomRoutes>
           <Route path="/treasury-admin" element={<TreasuryAdmin />} />
+          <Route path="/snapshot-proposal" element={<SnapshotProposal />} />
         </CustomRoutes>
       </Admin>
     </BrowserRouter>
