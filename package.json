@@ -17,7 +17,7 @@
     "@mui/material": "^5.8.0",
     "@mui/x-date-pickers": "^5.0.4",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
-    "@qidao/sdk": "5.1.26",
+    "@qidao/sdk": "5.1.29",
     "@snapshot-labs/snapshot.js": "^0.4.40",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
