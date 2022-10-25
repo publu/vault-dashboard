@@ -3,13 +3,18 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import * as MUI from "@mui/material";
 import { Button } from "@mui/material";
 import {
+  AVAX_ZAPPER_ADDRESS,
+  CAM_META,
+  CAMZAPPER_ADDRESS,
   ChainId,
   COLLATERAL,
   COLLATERAL_V2,
   COLLATERALS,
   Erc20Stablecoin,
+  FTM_ZAPPER_ADDRESS,
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
+  ZAP_META,
 } from "@qidao/sdk";
 import { ethers } from "ethers";
 import { Contract } from "ethers-multicall";
@@ -26,6 +31,7 @@ import {
 } from "react-admin";
 import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
+import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
 import { getId } from "../utils/utils";
 
@@ -233,6 +239,24 @@ const fetchVaultZeroes = async (
   });
 };
 
+const isBeefyZappable = (vaultAddress: string) => {
+  const zapVaultKeys = Object.values(ZAP_META).flat();
+  const zapZappableVaultsAddresses = zapVaultKeys.map(Object.keys).flat();
+
+  return zapZappableVaultsAddresses.includes(vaultAddress);
+};
+
+const isCamZappable = (vaultAddress: string) => {
+  const camVaultKeys = Object.values(CAM_META).flat();
+  const camZappableVaultsAddresses = camVaultKeys.map(Object.keys).flat();
+
+  return camZappableVaultsAddresses.includes(vaultAddress);
+};
+
+const isZappable = (vaultAddress: string) => {
+  return isBeefyZappable(vaultAddress) || isCamZappable(vaultAddress);
+};
+
 const TreasuryAdmin = () => {
   const [selectedChainId, setSelectedChainId] = useState(ChainId.MATIC);
 
@@ -255,49 +279,124 @@ const TreasuryAdmin = () => {
 
   type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
+  async function generateVaultTx(vault: TreasuryManagementVaultData) {
+    if (vault && metamaskProvider) {
+      try {
+        // const collateralAmount = await vaultContract.vaultCollateral(
+        //   vault.vaultIdx
+        // );
+        if (isCamZappable(vault.vaultAddress)) {
+          const camZapperAddress = CAMZAPPER_ADDRESS[vault.chainId];
+          if (camZapperAddress) {
+            const camZapperContract = CamZapper__factory.connect(
+              camZapperAddress,
+              metamaskProvider
+            );
+            const camMeta = CAM_META[vault.chainId]?.[vault.vaultAddress];
+            if (camMeta) {
+              const foo =
+                await camZapperContract.populateTransaction.camZapFromVault(
+                  ethers.utils.parseUnits(
+                    vault.depositedCollateralAmount.toString(),
+                    vault.token.decimals
+                  ),
+                  vault.vaultIdx,
+                  camMeta.underlying.address,
+                  camMeta.amTokenAddress,
+                  camMeta.camTokenAddress,
+                  vault.vaultAddress
+                );
+              return {
+                description: `${vault.token.name} zap from ${
+                  ChainName[vault.chainId]
+                }`,
+                raw: {
+                  to: camZapperAddress,
+                  value: "0",
+                  data: foo.data || "",
+                },
+              };
+            }
+          }
+        } else if (isBeefyZappable(vault.vaultAddress)) {
+          let beefyZapperAddress: string | undefined;
+          switch (vault.chainId) {
+            case ChainId.AVALANCHE:
+              beefyZapperAddress = AVAX_ZAPPER_ADDRESS;
+              break;
+            case ChainId.FANTOM:
+              beefyZapperAddress = FTM_ZAPPER_ADDRESS;
+              break;
+          }
+          if (beefyZapperAddress) {
+            const beefyZapperContract = BeefyZapper__factory.connect(
+              beefyZapperAddress,
+              metamaskProvider
+            );
+            const zapMeta = ZAP_META[vault.chainId]?.[vault.vaultAddress];
+            if (zapMeta) {
+              const foo =
+                await beefyZapperContract.populateTransaction.beefyZapFromVault(
+                  ethers.utils.parseUnits(
+                    vault.depositedCollateralAmount.toString(),
+                    vault.token.decimals
+                  ),
+                  vault.vaultIdx,
+                  zapMeta.underlying.address,
+                  zapMeta.mooAssetAddress,
+                  vault.vaultAddress
+                );
+              return {
+                description: `${vault.token.name} zap from ${
+                  ChainName[vault.chainId]
+                }`,
+                raw: {
+                  to: beefyZapperAddress,
+                  value: "0",
+                  data: foo.data || "",
+                },
+              };
+            }
+          }
+        } else {
+          const vaultContract = vault.connect(
+            vault.vaultAddress,
+            metamaskProvider
+          );
+          const foo = await (
+            vaultContract as Erc20Stablecoin
+          ).populateTransaction.withdrawCollateral(
+            vault.vaultIdx,
+            ethers.utils.parseUnits(
+              vault.depositedCollateralAmount.toString(),
+              vault.token.decimals
+            )
+          );
+          return {
+            description: `${vault.token.name} withdrawl from ${
+              ChainName[vault.chainId]
+            }`,
+            raw: {
+              to: vault.vaultAddress,
+              value: "0",
+              data: foo.data || "",
+            },
+          };
+        }
+      } catch (e) {
+        console.warn({ e });
+        return;
+      }
+    }
+    return;
+  }
+
   const a = async () => {
     const vaultWithdrawTxs:
       | Promise<(TxForTxBuilder | undefined) | undefined>[]
       | undefined = vaults
       ?.filter((v) => v.chainId === selectedChainId)
-      ?.map(async (vault) => {
-        if (vault && metamaskProvider) {
-          const vaultContract = vault.connect(
-            vault.vaultAddress,
-            metamaskProvider
-          );
-
-          try {
-            // const collateralAmount = await vaultContract.vaultCollateral(
-            //   vault.vaultIdx
-            // );
-            const foo = await (
-              vaultContract as Erc20Stablecoin
-            ).populateTransaction.withdrawCollateral(
-              vault.vaultIdx,
-              ethers.utils.parseUnits(
-                vault.depositedCollateralAmount.toString(),
-                vault.token.decimals
-              )
-            );
-            // const foo = vaultContract.populateTransaction.withdrawCollateral( );
-
-            return {
-              description: `${vault.token.name} withdrawl from ${
-                ChainName[vault.chainId]
-              }`,
-              raw: {
-                to: vault.vaultAddress,
-                value: "0",
-                data: foo.data || "",
-              },
-            };
-          } catch (e) {
-            console.warn({ e });
-            return;
-          }
-        } else return;
-      });
+      ?.map(async (vault) => await generateVaultTx(vault));
 
     if (vaultWithdrawTxs) {
       const vaultTxs = (await Promise.all(vaultWithdrawTxs)).filter(

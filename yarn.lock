@@ -2551,10 +2551,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
 
-"@qidao/sdk@5.1.26":
-  version "5.1.26"
-  resolved "https://registry.yarnpkg.com/@qidao/sdk/-/sdk-5.1.26.tgz#07be236dc068eb7e2c2108bb07ee64f7a655b811"
-  integrity sha512-uWm4TfIbo7YRmpkWy4prszQtS2z2YLYERhLAgq2/obKptlFi3hDvIDaobmG5/Baw5/Dfog6+zYcv82KwprwhFA==
+"@qidao/sdk@5.1.29":
+  version "5.1.29"
+  resolved "https://registry.yarnpkg.com/@qidao/sdk/-/sdk-5.1.29.tgz#f0e8e1b0383f920546f93aad21d0a7d8aad15990"
+  integrity sha512-BY0W9K0K+j0ety8XL0Yd+1O8hFXSRg6ZS2U9jiOb0lnbGWZKaBQt5xNHcKr4FL3cLh4L4bGzc+Ez/OR05919sw==
   dependencies:
     big.js "5.2.2"
     decimal.js-light "2.5.1"
