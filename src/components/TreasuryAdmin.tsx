@@ -18,6 +18,7 @@ import {
 } from "@qidao/sdk";
 import { ethers } from "ethers";
 import { Contract } from "ethers-multicall";
+import _ from "lodash";
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Datagrid,
@@ -279,12 +280,15 @@ const TreasuryAdmin = () => {
 
   type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
-  async function generateVaultTx(vault: TreasuryManagementVaultData) {
+  async function generateVaultTx(
+    vault: TreasuryManagementVaultData
+  ): Promise<TxForTxBuilder[]> {
     if (vault && metamaskProvider) {
       try {
-        // const collateralAmount = await vaultContract.vaultCollateral(
-        //   vault.vaultIdx
-        // );
+        const vaultContract = vault.connect(
+          vault.vaultAddress,
+          metamaskProvider
+        );
         if (isCamZappable(vault.vaultAddress)) {
           const camZapperAddress = CAMZAPPER_ADDRESS[vault.chainId];
           if (camZapperAddress) {
@@ -294,7 +298,11 @@ const TreasuryAdmin = () => {
             );
             const camMeta = CAM_META[vault.chainId]?.[vault.vaultAddress];
             if (camMeta) {
-              const foo =
+              const approveTx = await vaultContract.populateTransaction.approve(
+                camZapperAddress,
+                vault.vaultIdx
+              );
+              const zapTx =
                 await camZapperContract.populateTransaction.camZapFromVault(
                   ethers.utils.parseUnits(
                     vault.depositedCollateralAmount.toString(),
@@ -306,16 +314,26 @@ const TreasuryAdmin = () => {
                   camMeta.camTokenAddress,
                   vault.vaultAddress
                 );
-              return {
-                description: `${vault.token.name} zap from ${
-                  ChainName[vault.chainId]
-                }`,
-                raw: {
-                  to: camZapperAddress,
-                  value: "0",
-                  data: foo.data || "",
+              return [
+                {
+                  description: `Approve ${vault.token.name} w/ Zapper`,
+                  raw: {
+                    to: vault.vaultAddress,
+                    value: "0",
+                    data: approveTx.data || "",
+                  },
                 },
-              };
+                {
+                  description: `${vault.token.name} zap from ${
+                    ChainName[vault.chainId]
+                  }`,
+                  raw: {
+                    to: camZapperAddress,
+                    value: "0",
+                    data: zapTx.data || "",
+                  },
+                },
+              ];
             }
           }
         } else if (isBeefyZappable(vault.vaultAddress)) {
@@ -335,7 +353,11 @@ const TreasuryAdmin = () => {
             );
             const zapMeta = ZAP_META[vault.chainId]?.[vault.vaultAddress];
             if (zapMeta) {
-              const foo =
+              const approveTx = await vaultContract.populateTransaction.approve(
+                beefyZapperAddress,
+                vault.vaultIdx
+              );
+              const zapTx =
                 await beefyZapperContract.populateTransaction.beefyZapFromVault(
                   ethers.utils.parseUnits(
                     vault.depositedCollateralAmount.toString(),
@@ -346,23 +368,29 @@ const TreasuryAdmin = () => {
                   zapMeta.mooAssetAddress,
                   vault.vaultAddress
                 );
-              return {
-                description: `${vault.token.name} zap from ${
-                  ChainName[vault.chainId]
-                }`,
-                raw: {
-                  to: beefyZapperAddress,
-                  value: "0",
-                  data: foo.data || "",
+              return [
+                {
+                  description: `Approve ${vault.token.name} w/ Zapper`,
+                  raw: {
+                    to: vault.vaultAddress,
+                    value: "0",
+                    data: approveTx.data || "",
+                  },
                 },
-              };
+                {
+                  description: `${vault.token.name} zap from ${
+                    ChainName[vault.chainId]
+                  }`,
+                  raw: {
+                    to: beefyZapperAddress,
+                    value: "0",
+                    data: zapTx.data || "",
+                  },
+                },
+              ];
             }
           }
         } else {
-          const vaultContract = vault.connect(
-            vault.vaultAddress,
-            metamaskProvider
-          );
           const foo = await (
             vaultContract as Erc20Stablecoin
           ).populateTransaction.withdrawCollateral(
@@ -372,34 +400,38 @@ const TreasuryAdmin = () => {
               vault.token.decimals
             )
           );
-          return {
-            description: `${vault.token.name} withdrawl from ${
-              ChainName[vault.chainId]
-            }`,
-            raw: {
-              to: vault.vaultAddress,
-              value: "0",
-              data: foo.data || "",
+          return [
+            {
+              description: `${vault.token.name} withdrawl from ${
+                ChainName[vault.chainId]
+              }`,
+              raw: {
+                to: vault.vaultAddress,
+                value: "0",
+                data: foo.data || "",
+              },
             },
-          };
+          ];
         }
       } catch (e) {
         console.warn({ e });
-        return;
+        return [];
       }
     }
-    return;
+    return [];
   }
 
   const a = async () => {
-    const vaultWithdrawTxs:
-      | Promise<(TxForTxBuilder | undefined) | undefined>[]
-      | undefined = vaults
-      ?.filter((v) => v.chainId === selectedChainId)
-      ?.map(async (vault) => await generateVaultTx(vault));
+    const vaultWithdrawTxs: TxForTxBuilder[] = (
+      await Promise.all(
+        vaults
+          ?.filter((v) => v.chainId === selectedChainId)
+          ?.map(async (vault) => (await generateVaultTx(vault))?.flat())
+      )
+    ).flat();
 
-    if (vaultWithdrawTxs) {
-      const vaultTxs = (await Promise.all(vaultWithdrawTxs)).filter(
+    if (!_.isEmpty(vaultWithdrawTxs)) {
+      const vaultTxs = vaultWithdrawTxs.filter(
         (item): item is TxForTxBuilder => !!item
       );
       // const safeTx = await safeSdk.createTransaction({
