@@ -1,4 +1,3 @@
-import { MetaTransactionData } from "@gnosis.pm/safe-core-sdk-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as MUI from "@mui/material";
 import { Button } from "@mui/material";
@@ -35,6 +34,7 @@ import { ChainName } from "../constants";
 import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
 import { getId } from "../utils/utils";
+import { TxForTxBuilder } from "./types";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
 // const transactionServiceUrl = "https://safe-transaction.gnosis.io/"; // on rinkeby testnet
@@ -277,8 +277,6 @@ const TreasuryAdmin = () => {
     };
     void fetchAllChainsVaultZeros();
   }, []);
-
-  type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
   async function generateVaultTx(
     vault: TreasuryManagementVaultData
