@@ -1,4 +1,5 @@
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BallotIcon from "@mui/icons-material/Ballot";
 import CurrencyBitcoinIcon from "@mui/icons-material/CurrencyBitcoin";
 import * as React from "react";
@@ -20,6 +21,11 @@ export const MyMenu = (props: JSX.IntrinsicAttributes & RA.MenuProps) => (
       to="/snapshot-proposal"
       primaryText="Snapshot Proposal"
       leftIcon={<BallotIcon />}
+    />
+    <RA.Menu.Item
+      to="/vault-admin-management"
+      primaryText="Vault Admin Operations"
+      leftIcon={<AdminPanelSettingsIcon />}
     />
     {/*<RA.Menu.Item to="/users" primaryText="Users" leftIcon={<PeopleIcon />}/>*/}
     {/*<RA.Menu.Item to="/custom-route" primaryText="Miscellaneous" leftIcon={<LabelIcon />}/>*/}

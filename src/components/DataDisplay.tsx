@@ -8,7 +8,7 @@ import {
 } from "@qidao/sdk";
 import { Contract } from "ethers-multicall";
 import fakeDataProvider from "ra-data-fakerest";
-import React, { useLayoutEffect } from "react";
+import React from "react";
 import {
   Admin,
   CustomRoutes,
@@ -25,6 +25,7 @@ import { fetchVaultInfo } from "../vaultInfo";
 import Layout from "./Layout";
 import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
+import VaultAdminPanel from "./VaultAdminPanel";
 import VaultList from "./VaultList";
 
 let addedVaults = new Set();
@@ -177,10 +178,10 @@ const DataDisplay: React.FC = () => {
     vaults: [],
   });
   const notify = useNotify();
-  useLayoutEffect(
-    () => fetchVaults(dataProvider, notify),
-    [dataProvider, notify]
-  );
+  // useLayoutEffect(
+  //   () => fetchVaults(dataProvider, notify),
+  //   [dataProvider, notify]
+  // );
 
   return (
     <BrowserRouter>
@@ -189,6 +190,7 @@ const DataDisplay: React.FC = () => {
         <CustomRoutes>
           <Route path="/treasury-admin" element={<TreasuryAdmin />} />
           <Route path="/snapshot-proposal" element={<SnapshotProposal />} />
+          <Route path="/vault-admin-management" element={<VaultAdminPanel />} />
         </CustomRoutes>
       </Admin>
     </BrowserRouter>
