@@ -15,8 +15,8 @@ import {
   GAUGE_VALID_COLLATERAL_V2,
   ZAP_META,
 } from "@qidao/sdk";
+import { Contract } from "ethcall";
 import { ethers } from "ethers";
-import { Contract } from "ethers-multicall";
 import _ from "lodash";
 import React, { Dispatch, useEffect, useState } from "react";
 import {
@@ -35,6 +35,7 @@ import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
 import { getId } from "../utils/utils";
 import { TxForTxBuilder } from "./types";
+import { saveTemplateAsFile } from "./utils/files";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
 // const transactionServiceUrl = "https://safe-transaction.gnosis.io/"; // on rinkeby testnet
@@ -68,26 +69,6 @@ import { TxForTxBuilder } from "./types";
 //   });
 //   return { safeService, safeSdk };
 // };
-
-const saveTemplateAsFile = (filename: string, dataObjToWrite: Object) => {
-  const blob = new Blob([JSON.stringify(dataObjToWrite)], {
-    type: "text/json",
-  });
-  const link = document.createElement("a");
-
-  link.download = filename;
-  link.href = window.URL.createObjectURL(blob);
-  link.dataset.downloadurl = ["text/json", link.download, link.href].join(":");
-
-  const evt = new MouseEvent("click", {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  });
-
-  link.dispatchEvent(evt);
-  link.remove();
-};
 
 const EditiableRow = (
   props: TextFieldProps & {

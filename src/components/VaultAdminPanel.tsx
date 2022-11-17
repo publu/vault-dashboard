@@ -1,4 +1,8 @@
+import LoadingButton from "@mui/lab/LoadingButton";
+import * as MUI from "@mui/material";
 import { TextField } from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
+import Grid from "@mui/material/Unstable_Grid2";
 import {
   ChainId,
   COLLATERAL,
@@ -6,56 +10,79 @@ import {
   COLLATERALS,
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
+  OG_MATIC_VAULT,
 } from "@qidao/sdk";
-import { BigNumber, ethers } from "ethers";
-import React, { createContext, useContext, useState } from "react";
+import { BigNumber } from "ethers";
+import _ from "lodash/fp";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useChainId, useProvider } from "../Connectors/Metamask";
-import { VaultContract } from "./types";
+import {
+  isSlimContract,
+  isV2Contract,
+  TxForTxBuilder,
+  VaultContract,
+  VaultContractSlim,
+  VaultContractV1,
+  VaultContractV2,
+} from "./types";
+import { saveTemplateAsFile } from "./utils/files";
 
-type VaultAdminVaultData = (
-  | COLLATERAL
-  | COLLATERAL_V2
-  | GAUGE_VALID_COLLATERAL
-  | GAUGE_VALID_COLLATERAL_V2
-) & {
-  depositedCollateralAmount: number;
-  id: string | number;
-  vaultIdx: number;
-};
-
-// async function generateVaultTx(
-//   collateral: VaultAdminVaultData,
-//   provider: Provider
-// ): Promise<TxForTxBuilder[]> {
-//   return [
-//     {
-//       description: `${collateral.token.name} zap from ${
-//         ChainName[collateral.chainId]
-//       }`,
-//       raw: {
-//         to: collateral.vaultAddress,
-//         value: "0",
-//         data: opTx.data || "",
-//       },
-//     },
-//   ];
-// }
 interface VaultAdminContextInterface {
-  burn: boolean;
-  changeEthPriceSource?: string;
-  setAdmin?: string;
-  setDebtRatio?: BigNumber;
-  setGainRatio?: BigNumber;
-  setInterestRate?: BigNumber;
-  setMaxDebt?: BigNumber;
-  setMinDebt?: BigNumber;
-  setRef?: string;
-  setTokenURI?: string;
+  includeInTx: {
+    burn: boolean;
+    changeEthPriceSource: boolean;
+    setAdmin: boolean;
+    setGainRatio: boolean;
+    setInterestRate: boolean;
+    setMaxDebt: boolean;
+    setMinDebt: boolean;
+    setOpeningFee: boolean;
+    setRef: boolean;
+    setTokenURI: boolean;
+  };
+  formValues: {
+    burn: null | BigNumber;
+    changeEthPriceSource: null | string;
+    setAdmin: null | string;
+    setGainRatio: null | BigNumber;
+    setInterestRate: null | BigNumber;
+    setMaxDebt: null | BigNumber;
+    setMinDebt: null | BigNumber;
+    setOpeningFee: null | BigNumber;
+    setRef: null | string;
+    setTokenURI: null | string;
+  };
 }
 
-const VaultAdminContext = createContext<VaultAdminContextInterface>({
-  burn: false,
-});
+const defaultVaultAdminContext: VaultAdminContextInterface = {
+  includeInTx: {
+    burn: false,
+    changeEthPriceSource: false,
+    setAdmin: false,
+    setGainRatio: false,
+    setInterestRate: false,
+    setMaxDebt: false,
+    setMinDebt: false,
+    setOpeningFee: false,
+    setRef: false,
+    setTokenURI: false,
+  },
+  formValues: {
+    burn: null,
+    changeEthPriceSource: null,
+    setAdmin: null,
+    setGainRatio: null,
+    setInterestRate: null,
+    setMaxDebt: null,
+    setMinDebt: null,
+    setOpeningFee: null,
+    setRef: null,
+    setTokenURI: null,
+  },
+};
+const VaultAdminContext = createContext<VaultAdminContextInterface>(
+  defaultVaultAdminContext
+);
 
 const VaultAdminDispatchContext = createContext<
   | ((
@@ -75,54 +102,10 @@ function useVaultAdminContext() {
 function useVaultAdminDispatchContext() {
   return useContext(VaultAdminDispatchContext);
 }
-const NumericalField: React.FC<{
-  vaultContract: VaultContract;
-  label: string;
-  vaultMethod: VaultAdminMethod;
-  decimals: number;
-}> = ({ vaultContract, label, vaultMethod, decimals }) => {
-  const setFormState = useVaultAdminDispatchContext();
-  const currentFormState = useVaultAdminContext();
 
-  const [formField, setFormField] = useState("0");
-
-  function modifyFormState(
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) {
-    if (setFormState) {
-      setFormState({
-        ...currentFormState,
-        [vaultMethod]: ethers.utils.parseUnits(e.target.value, decimals),
-      });
-    }
-  }
-
-  if (!(vaultMethod in vaultContract)) {
-    return <></>;
-  } else {
-    // const tx = vaultContract.populateTransaction["setOpeningFee"]();
-    return (
-      <div>
-        <TextField
-          id="outlined-basic"
-          label={label}
-          value={formField}
-          onChange={(e) => {
-            setFormField(e.target.value);
-            modifyFormState(e);
-          }}
-          variant="outlined"
-          fullWidth
-        />
-      </div>
-    );
-  }
-};
-
-enum VaultAdminMethod {
+enum VaultAdminSetMethod {
   "changeEthPriceSource" = "changeEthPriceSource",
   "setGainRatio" = "setGainRatio",
-  "setDebtRatio" = "setDebtRatio",
   "setOpeningFee" = "setOpeningFee",
   "setTokenURI" = "setTokenURI",
   "setMinDebt" = "setMinDebt",
@@ -133,12 +116,409 @@ enum VaultAdminMethod {
   "setInterestRate" = "setInterestRate",
 }
 
+const Field: React.FC<{
+  vaultContract: VaultContractV1 | VaultContractSlim | VaultContractV2;
+  label: string;
+  vaultMethod: VaultAdminSetMethod;
+  decimals: number;
+}> = ({ vaultContract, label, vaultMethod }) => {
+  const setFormState = useVaultAdminDispatchContext();
+  const currentFormState = useVaultAdminContext();
+
+  function modifyFormState(
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) {
+    if (setFormState) {
+      setFormState(
+        _.merge(currentFormState, {
+          formValues: { [vaultMethod]: e.target.value },
+        })
+      );
+    }
+  }
+
+  if (!(vaultMethod in vaultContract)) {
+    return <></>;
+  } else {
+    return (
+      <>
+        <Grid xs={1}>
+          <Checkbox
+            checked={currentFormState.includeInTx[vaultMethod]}
+            onChange={(event) => {
+              if (setFormState) {
+                setFormState(
+                  _.merge(currentFormState, {
+                    includeInTx: { [vaultMethod]: event.target.checked },
+                  })
+                );
+              }
+            }}
+          />
+        </Grid>
+
+        <Grid xs={11}>
+          <TextField
+            id="outlined-basic"
+            label={label}
+            value={currentFormState.formValues[vaultMethod] || ""}
+            onChange={(e) => {
+              modifyFormState(e);
+            }}
+            variant="outlined"
+            fullWidth
+          />
+        </Grid>
+      </>
+    );
+  }
+};
+
+const CollateralSelector: React.FC<{
+  selectedCollateral:
+    | COLLATERAL
+    | COLLATERAL_V2
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2;
+  setSelectedCollateral: Function;
+}> = ({ selectedCollateral, setSelectedCollateral }) => {
+  const chainId = useChainId() as ChainId;
+  if (!chainId) {
+    return <></>;
+  }
+  const collateralsForChain = COLLATERALS[chainId] || [];
+  return (
+    <MUI.FormControl fullWidth>
+      <MUI.InputLabel id="demo-simple-select-label">Collateral</MUI.InputLabel>
+      <MUI.Select
+        labelId="demo-simple-select-label"
+        id="demo-simple-select"
+        value={selectedCollateral.vaultAddress}
+        label="Collateral"
+        onChange={(e) => {
+          const collateralVaultAddress = e.target.value;
+          const newSelectedCollateral = collateralsForChain?.find(
+            (c) => c.vaultAddress === collateralVaultAddress
+          );
+          setSelectedCollateral(newSelectedCollateral);
+        }}
+      >
+        {collateralsForChain.map((co) => {
+          return (
+            <MUI.MenuItem key={co.vaultAddress} value={co.vaultAddress}>
+              {co.token.name}
+            </MUI.MenuItem>
+          );
+        })}
+      </MUI.Select>
+    </MUI.FormControl>
+  );
+};
+
+interface VaultValues {
+  ethPriceSource: null | string;
+  gainRatio: null | BigNumber;
+  openingFee: null | BigNumber;
+  minDebt: null | BigNumber;
+  maxDebt: null | BigNumber;
+  ref: null | string;
+  adm: null | string;
+  interestRate: null | BigNumber;
+  tokenURI: null | string;
+}
+
+const generateTx = async (
+  vaultContract: VaultContract,
+  context: VaultAdminContextInterface
+) => {
+  type FormValueKey = keyof VaultAdminContextInterface["formValues"];
+  const ks: FormValueKey[] = Object.keys(context.formValues) as FormValueKey[];
+
+  const txs: (TxForTxBuilder | null)[] = await Promise.all(
+    ks.map(async (k) => {
+      const formValue = context.formValues[k];
+      const includeInTx = context.includeInTx[k];
+      if (formValue) {
+        switch (k) {
+          case "burn":
+            if (k in vaultContract && includeInTx)
+              if (isV2Contract(vaultContract) || isSlimContract(vaultContract))
+                return {
+                  description: `${k} to ${formValue}`,
+                  raw: {
+                    to: vaultContract.address,
+                    value: "0",
+                    data:
+                      (
+                        await vaultContract.populateTransaction[k](
+                          formValue.toString()
+                        )
+                      ).data || "",
+                  },
+                };
+            break;
+          case "changeEthPriceSource":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )
+                    ).data || "",
+                },
+              };
+            break;
+          case "setAdmin":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setGainRatio":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setInterestRate":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setMaxDebt":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setMinDebt":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setOpeningFee":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setRef":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+          case "setTokenURI":
+            if (k in vaultContract && includeInTx)
+              return {
+                description: `${k} to ${formValue}`,
+                raw: {
+                  to: vaultContract.address,
+                  value: "0",
+                  data:
+                    (
+                      (await vaultContract.populateTransaction[k](
+                        formValue.toString()
+                      )) || ""
+                    ).data || "",
+                },
+              };
+            break;
+        }
+      }
+      return null;
+    })
+  );
+  const someTxs = txs.flatMap((x) => (x ? [x] : []));
+  saveTemplateAsFile(`${vaultContract.address}-admin-txes.json`, someTxs);
+};
+
 export default function VaultAdminPanel() {
   const metamaskProvider = useProvider();
   const chainId = useChainId() as ChainId;
-  const collateral = COLLATERALS[chainId]?.[0];
+  const [collateral, setCollateral] = useState(COLLATERALS[chainId]?.[0]);
   const [vaultAdminContextState, setVaultAdminContextState] =
-    useState<VaultAdminContextInterface>({ burn: false });
+    useState<VaultAdminContextInterface>(defaultVaultAdminContext);
+
+  useEffect(() => {
+    if (collateral && metamaskProvider) {
+      const vaultContract = collateral.connect(
+        collateral.vaultAddress,
+        metamaskProvider
+      );
+
+      const fetchVaultValues = async () => {
+        setVaultAdminContextState(defaultVaultAdminContext);
+        let calls: VaultValues = {
+          adm: null,
+          ethPriceSource: null,
+          gainRatio: null,
+          interestRate: null,
+          maxDebt: null,
+          minDebt: null,
+          openingFee: null,
+          ref: null,
+          tokenURI: null,
+        };
+
+        if (isV2Contract(vaultContract)) {
+          calls = {
+            ...calls,
+            maxDebt: await vaultContract.maxDebt(),
+            ref: await vaultContract.ref(),
+            adm: await vaultContract.adm(),
+            interestRate: await vaultContract.iR(),
+          };
+        }
+        if (isSlimContract(vaultContract)) {
+          try {
+            calls = {
+              ...calls,
+              minDebt: await vaultContract.minDebt(),
+            };
+          } catch (e: any) {
+            console.warn(
+              `Failed to fetch minDebt from ${vaultContract.address}})`
+            );
+          }
+        }
+
+        if ("openingFee" in vaultContract) {
+          try {
+            calls = { ...calls, openingFee: await vaultContract.openingFee() };
+          } catch (e: any) {
+            console.warn(
+              `Failed to fetch openingFee from ${vaultContract.address}})`
+            );
+          }
+        }
+
+        if (
+          "tokenURI" in vaultContract &&
+          vaultContract.address !== OG_MATIC_VAULT
+        ) {
+          try {
+            calls = { ...calls, tokenURI: await vaultContract.tokenURI(0) };
+          } catch (e: any) {
+            console.warn(
+              `Failed to fetch tokenURI from ${vaultContract.address}})`
+            );
+          }
+        }
+        if (
+          "gainRatio" in vaultContract &&
+          vaultContract.address !== OG_MATIC_VAULT
+        ) {
+          try {
+            calls = { ...calls, gainRatio: await vaultContract.gainRatio() };
+          } catch (e: any) {
+            console.warn(
+              `Failed to fetch gainRatio from ${vaultContract.address}})`
+            );
+          }
+        }
+
+        calls = {
+          ...calls,
+          ethPriceSource: await vaultContract.ethPriceSource(),
+        };
+        setVaultAdminContextState({
+          includeInTx: { ...vaultAdminContextState.includeInTx },
+          formValues: {
+            burn: BigNumber.from(0),
+            changeEthPriceSource: calls.ethPriceSource,
+            setAdmin: calls.adm,
+            setGainRatio: calls.gainRatio,
+            setInterestRate: calls.interestRate,
+            setMaxDebt: calls.maxDebt,
+            setMinDebt: calls.minDebt,
+            setOpeningFee: calls.openingFee,
+            setRef: calls.ref,
+            setTokenURI: calls.tokenURI,
+          },
+        });
+      };
+
+      void fetchVaultValues();
+    }
+  }, [collateral, metamaskProvider]);
 
   if (collateral && metamaskProvider) {
     const vaultContract = collateral.connect(
@@ -146,63 +526,91 @@ export default function VaultAdminPanel() {
       metamaskProvider
     );
 
-    let adminFns = ["changeEthPriceSource"];
-
-    if (VaultAdminMethod.setTokenURI in vaultContract) {
-    }
-    if ("setRef" in vaultContract) {
-    }
-    if ("setAdmin" in vaultContract) {
-    }
-    if ("burn" in vaultContract) {
-    }
     return (
       <VaultAdminDispatchContext.Provider value={setVaultAdminContextState}>
         <VaultAdminContext.Provider value={vaultAdminContextState}>
-          <div>
-            <NumericalField
+          <Grid container spacing={2}>
+            <Grid xs={4}>
+              <CollateralSelector
+                selectedCollateral={collateral}
+                setSelectedCollateral={setCollateral}
+              />
+            </Grid>
+            <Grid xs={6} />
+            <Grid xs={2}>
+              <LoadingButton
+                // disabled={titleError || submissionMade}
+                // loading={submissionMade}
+                variant="contained"
+                onClick={() =>
+                  generateTx(vaultContract, vaultAdminContextState)
+                }
+              >
+                Submit
+              </LoadingButton>
+            </Grid>
+
+            <Field
               vaultContract={vaultContract}
               label={"Gain Ratio"}
-              vaultMethod={VaultAdminMethod.setGainRatio}
+              vaultMethod={VaultAdminSetMethod.setGainRatio}
               decimals={2}
             />
-            <NumericalField
-              vaultContract={vaultContract}
-              label={"Debt Ratio"}
-              vaultMethod={VaultAdminMethod.setDebtRatio}
-              decimals={2}
-            />
-            <NumericalField
+            <Field
               vaultContract={vaultContract}
               label={"Min Debt"}
-              vaultMethod={VaultAdminMethod.setMinDebt}
+              vaultMethod={VaultAdminSetMethod.setMinDebt}
               decimals={2}
             />
-            <NumericalField
+            <Field
               vaultContract={vaultContract}
               label={"Max Debt"}
-              vaultMethod={VaultAdminMethod.setMaxDebt}
+              vaultMethod={VaultAdminSetMethod.setMaxDebt}
               decimals={2}
             />
-            <NumericalField
+            <Field
               vaultContract={vaultContract}
               label={"Interest Rate"}
-              vaultMethod={VaultAdminMethod.setInterestRate}
+              vaultMethod={VaultAdminSetMethod.setInterestRate}
               decimals={2}
             />
-            <NumericalField
+            <Field
               vaultContract={vaultContract}
               label={"Opening Fee"}
-              vaultMethod={VaultAdminMethod.setOpeningFee}
+              vaultMethod={VaultAdminSetMethod.setOpeningFee}
               decimals={2}
             />
-            <NumericalField
+            <Field
               vaultContract={vaultContract}
               label={"Burn"}
-              vaultMethod={VaultAdminMethod.burn}
+              vaultMethod={VaultAdminSetMethod.burn}
               decimals={2}
             />
-          </div>
+            <Field
+              vaultContract={vaultContract}
+              label={"Admin"}
+              vaultMethod={VaultAdminSetMethod.setAdmin}
+              decimals={2}
+            />
+            <Field
+              vaultContract={vaultContract}
+              label={"Price Source"}
+              vaultMethod={VaultAdminSetMethod.changeEthPriceSource}
+              decimals={2}
+            />
+            <Field
+              vaultContract={vaultContract}
+              label={"Ref"}
+              vaultMethod={VaultAdminSetMethod.setRef}
+              decimals={2}
+            />
+            <Field
+              vaultContract={vaultContract}
+              label={"Token URI"}
+              vaultMethod={VaultAdminSetMethod.setTokenURI}
+              decimals={2}
+            />
+          </Grid>
         </VaultAdminContext.Provider>
       </VaultAdminDispatchContext.Provider>
     );

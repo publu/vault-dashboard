@@ -6,7 +6,7 @@ import {
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
 } from "@qidao/sdk";
-import { Contract } from "ethers-multicall";
+import { Contract } from "ethcall";
 import _ from "lodash";
 import { ChainName, RPCS } from "./constants";
 import { ERC20__factory } from "./contracts";
@@ -52,10 +52,12 @@ export async function fetchVaultInfo(
   const collateralPriceCall = vaultContract.getEthPriceSource();
   const collateralAddressCall = vaultContract.collateral();
 
-  let [totalSupply, collateralPrice, collateralAddress] = await multicall(
-    collateral.chainId,
-    [totalSupplyCall, collateralPriceCall, collateralAddressCall]
-  );
+  let [totalSupply, collateralPrice, collateralAddress]: any[] =
+    await multicall(collateral.chainId, [
+      totalSupplyCall,
+      collateralPriceCall,
+      collateralAddressCall,
+    ]);
 
   totalSupply = totalSupply.toNumber();
   collateralPrice = (collateralPrice as unknown as number) / 1e8;
@@ -69,7 +71,7 @@ export async function fetchVaultInfo(
   const limitToFetch = totalSupply;
   const existsCalls = _.range(limitToFetch).map((i) => vaultContract.exists(i));
 
-  const vaultsExistCheck: boolean[] = await multicall(
+  const vaultsExistCheck: any[] = await multicall(
     collateral.chainId,
     existsCalls
   );
@@ -87,12 +89,12 @@ export async function fetchVaultInfo(
   const debtCalls = vaultsToFetch.map((i) => vaultContract.vaultDebt(i));
   const debtAmounts = await multicall(collateral.chainId, debtCalls);
   const ownerCalls = vaultsToFetch.map((i) => vaultContract.ownerOf(i));
-  const owners = await multicall(collateral.chainId, ownerCalls);
+  const owners = await multicall<string>(collateral.chainId, ownerCalls);
 
   const riskyCalls = vaultsToFetch.map((i) =>
     vaultContract.checkLiquidation(i)
   );
-  const riskyVaults = await multicall(collateral.chainId, riskyCalls);
+  const riskyVaults = await multicall<any>(collateral.chainId, riskyCalls);
 
   const vaultChainName = ChainName[collateral.chainId];
   const vaultInfo: (
@@ -111,8 +113,8 @@ export async function fetchVaultInfo(
       collateral.shortName +
       "/" +
       vaultIdx.toString();
-    const owner = owners[i];
-    const risky = riskyVaults[i];
+    const owner = owners[i] || "";
+    const risky = riskyVaults[i] || false;
 
     const collateralAmount =
       (collateralAmounts[i] as unknown as number) /

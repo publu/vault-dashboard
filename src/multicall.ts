@@ -1,22 +1,24 @@
 import { ChainId } from "@qidao/sdk";
-import { Provider, setMulticallAddress } from "ethers-multicall";
+import { Provider } from "ethcall";
 import _ from "lodash";
 import PQueue from "p-queue";
-import { MULTICALL_NETWORKS, PROVIDERS, RPCS } from "./constants";
+import { PROVIDERS, RPCS } from "./constants";
 
 const ethcallProvider: { [chainId in ChainId]?: Provider } = {};
 const ethcallQueue: { [chainId in ChainId]?: PQueue } = {};
+const ethcall2Queue: { [chainId in ChainId]?: PQueue } = {};
 const MULTICALL_CONCURRENCY = 5;
 
 async function setupAndInitMulticall(chainId: ChainId) {
-  setMulticallAddress(chainId, MULTICALL_NETWORKS[chainId] || "");
+  // setMulticallAddress(chainId, MULTICALL_NETWORKS[chainId] || "");
   console.log(`Setting up multicall for Chain ${chainId}`);
   let provider = PROVIDERS[chainId];
-  if (provider) {
-    const callProvider = new Provider(provider);
-    await callProvider.init();
+  if (provider && !ethcallProvider[chainId]) {
+    const callProvider = new Provider();
+    await callProvider.init(provider);
     ethcallProvider[chainId] = callProvider;
     ethcallQueue[chainId] = new PQueue({ concurrency: MULTICALL_CONCURRENCY });
+    ethcall2Queue[chainId] = new PQueue({ concurrency: MULTICALL_CONCURRENCY });
   }
 }
 
@@ -30,14 +32,31 @@ export async function init() {
   );
 }
 
-export async function multicall(chainId: ChainId, calls: any[]) {
+export async function multicall<T>(chainId: ChainId, calls: any[]) {
   const callProvider = ethcallProvider[chainId];
   const queue = ethcallQueue[chainId];
   if (callProvider) {
     return (
       await Promise.all(
         _.chunk(calls, 450).map((cs) => {
-          return queue?.add(() => callProvider.all(cs));
+          return queue?.add(() => callProvider.all<T>(cs));
+        })
+      )
+    ).flat();
+  } else {
+    throw new Error(
+      `No call provider for chain: ${chainId}, did you call init?`
+    );
+  }
+}
+export async function multicall2<T>(chainId: ChainId, calls: any[]) {
+  const callProvider = ethcallProvider[chainId];
+  const queue = ethcall2Queue[chainId];
+  if (callProvider) {
+    return (
+      await Promise.all(
+        _.chunk(calls, 450).map((cs) => {
+          return queue?.add(() => callProvider.tryAll<T>(cs));
         })
       )
     ).flat();
