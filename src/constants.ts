@@ -138,6 +138,9 @@ const SKIP_RPCS = [
   ChainId.RINKEBY,
   ChainId.KOVAN,
   ChainId.HARMONY_TESTNET,
+  ChainId.HECO,
+  ChainId.HECO_TESTNET,
+  ChainId.FANTOM_TESTNET,
 ];
 
 export const PROVIDERS = Object.entries(RPCS).reduce(

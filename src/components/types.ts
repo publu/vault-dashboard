@@ -11,17 +11,38 @@ import {
   Erc20Stablecoin,
   StableQiVault,
 } from "@qidao/sdk";
+import { QiStablecoin } from "../contracts";
 
 export type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
-export type VaultContract =
+export type VaultContractV2 = StableQiVault;
+
+export type VaultContractSlim =
+  | CrosschainQiStablecoinSlim
+  | CrosschainQiStablecoinSlimV2;
+
+export type VaultContractV1 =
   | Erc20Stablecoin
   | Erc20QiStablecoinwbtc
   | Erc20QiStablecoincamwbtc
-  | StableQiVault
   | CrosschainQiStablecoin
   | CrosschainNativeQiStablecoin
   | CrosschainQiStablecoinV2
-  | CrosschainQiStablecoinSlim
-  | CrosschainQiStablecoinSlimV2
   | CrosschainQiStablecoinwbtc;
+
+export type VaultContract =
+  | QiStablecoin
+  | VaultContractV1
+  | VaultContractSlim
+  | VaultContractV2;
+
+export function isV2Contract(
+  vaultContract: VaultContract
+): vaultContract is VaultContractV2 {
+  return (vaultContract as VaultContractV2).iR !== undefined;
+}
+export function isSlimContract(
+  vaultContract: VaultContract
+): vaultContract is VaultContractSlim {
+  return (vaultContract as VaultContractSlim).minDebt !== undefined;
+}

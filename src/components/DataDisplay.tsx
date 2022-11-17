@@ -6,9 +6,9 @@ import {
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
 } from "@qidao/sdk";
-import { Contract } from "ethers-multicall";
+import { Contract } from "ethcall";
 import fakeDataProvider from "ra-data-fakerest";
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import {
   Admin,
   CustomRoutes,
@@ -178,10 +178,10 @@ const DataDisplay: React.FC = () => {
     vaults: [],
   });
   const notify = useNotify();
-  // useLayoutEffect(
-  //   () => fetchVaults(dataProvider, notify),
-  //   [dataProvider, notify]
-  // );
+  useLayoutEffect(
+    () => fetchVaults(dataProvider, notify),
+    [dataProvider, notify]
+  );
 
   return (
     <BrowserRouter>
