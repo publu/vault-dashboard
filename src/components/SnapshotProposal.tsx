@@ -3,6 +3,7 @@ import { Box, TextField } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import {
+  ChainId,
   COLLATERALS,
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
@@ -11,7 +12,7 @@ import {
 import snapshot from "@snapshot-labs/snapshot.js";
 import { addDays, getUnixTime } from "date-fns/fp"; // Grid version 2
 import React, { useState } from "react";
-import { useAccount, useProvider } from "../Connectors/Metamask";
+import { useAccount, useChainId, useProvider } from "../Connectors/Metamask";
 import CheckboxList from "./CheckBoxList";
 
 const hub = "https://hub.snapshot.org"; // or https://testnet.snapshot.org for testnet
@@ -80,6 +81,10 @@ Note: Qi holders will be able to vote from any chain that has QI.
       }
     }
   };
+
+  const chainId = useChainId();
+  if (chainId && chainId !== ChainId.MATIC)
+    return <div>Swap to Polygon, we need the correct block numbers</div>;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
