@@ -43,6 +43,7 @@ const VaultList: React.FC = () => {
         <NumberField source="cdr" options={{ style: "percent" }} />
         <NumberField source="risky" />
         <DeepLinkField source="vaultLink" />
+
         {/*<LiquidateButton/>*/}
       </Datagrid>
     </List>
