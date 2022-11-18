@@ -13,6 +13,7 @@ import {
   FTM_ZAPPER_ADDRESS,
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
+  OG_MATIC_VAULT,
   ZAP_META,
 } from "@qidao/sdk";
 import { Contract } from "ethcall";
@@ -35,6 +36,7 @@ import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
 import { getId } from "../utils/utils";
 import { TxForTxBuilder } from "./types";
+import { shortenAddress } from "./utils/addresses";
 import { saveTemplateAsFile } from "./utils/files";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
@@ -112,6 +114,16 @@ const EditiableRow = (
       )}
     </>
   );
+};
+
+const AddressField = (
+  props: TextFieldProps & {
+    source: string;
+  }
+) => {
+  const record = useRecordContext(props);
+  console.log(record);
+  return <span>{shortenAddress(record.owner)}</span>;
 };
 
 const ChainSelector: React.FC<{
@@ -204,16 +216,27 @@ const fetchVaultZeroes = async (
     const vaultContract = new Contract(c.vaultAddress, c.contractAbi);
     return vaultContract.vaultCollateral(VAULT_IDX);
   });
-
   const depositedCollaterals = await multicall(
     chainId,
     depositedCollateralCalls
   );
+
+  const vaultOwnerCalls = collaterals.map((c) => {
+    const vaultAddress =
+      c.vaultAddress !== OG_MATIC_VAULT
+        ? c.vaultAddress
+        : "0x6AF1d9376a7060488558cfB443939eD67Bb9b48d";
+    const vaultContract = new Contract(vaultAddress, c.contractAbi);
+    return vaultContract.ownerOf(VAULT_IDX);
+  });
+  const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls);
   return collaterals.map((c, i) => {
     const depositedCollateralAmount =
       (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals;
+    const owner = vaultOwners[i];
     return {
       ...c,
+      owner,
       depositedCollateralAmount,
       id: getId(c, VAULT_IDX),
       vaultIdx: VAULT_IDX,
@@ -413,24 +436,10 @@ const TreasuryAdmin = () => {
       const vaultTxs = vaultWithdrawTxs.filter(
         (item): item is TxForTxBuilder => !!item
       );
-      // const safeTx = await safeSdk.createTransaction({
-      //   safeTransactionData: vaultTxs,
-      // });
       console.log({ vaultTxs });
-      // console.log({ safeTx });
       saveTemplateAsFile(`${selectedChainId}-withdraw-txes.json`, vaultTxs);
-      // const safeTxHash = await safeSdk.getTransactionHash(safeTx);
-      // const signature = await safeSdk.signTransactionHash(safeTxHash);
-      // await safeService?.proposeTransaction({
-      //   safeAddress: safeAddress,
-      //   senderAddress: address || "",
-      //   safeTransactionData: safeTx.data,
-      //   senderSignature: signature.data,
-      //   safeTxHash: safeTxHash,
-      // });
     }
   };
-  // }, [address, metamaskProvider, safeSdk, safeService, vaults]);
   const listContext = useList({
     data: vaults?.filter((v) => v.chainId === selectedChainId) || [],
   });
@@ -459,6 +468,7 @@ const TreasuryAdmin = () => {
               setVaults={setVaults}
             />
             <TextField source="token.name" />
+            <AddressField source="owner" />
           </Datagrid>
         </ListContextProvider>
       </>
