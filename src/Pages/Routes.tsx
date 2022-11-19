@@ -18,11 +18,11 @@ import {
   useNotify,
 } from "react-admin";
 import { BrowserRouter, Route } from "react-router-dom";
+import Layout from "../components/Layout";
 import { ChainName } from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
-import Layout from "./Layout";
 import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultAdminPanel from "./VaultAdminPanel";
@@ -173,7 +173,7 @@ function generateEmptyVault(
   };
 }
 
-const DataDisplay: React.FC = () => {
+const Routes: React.FC = () => {
   const dataProvider = fakeDataProvider({
     vaults: [],
   });
@@ -197,4 +197,4 @@ const DataDisplay: React.FC = () => {
   );
 };
 
-export default DataDisplay;
+export default Routes;

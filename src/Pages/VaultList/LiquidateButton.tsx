@@ -1,14 +1,14 @@
 import { ChainId } from "@qidao/sdk";
-import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import React, { useEffect, useState } from "react";
 import { Button, useRecordContext } from "react-admin";
 import {
   useAccount,
   useChainId,
   useIsActive,
   useProvider,
-} from "../Connectors/Metamask";
-import { ethers } from "ethers";
-import { maiAddresses, MAIFACTORIES, PROVIDERS } from "../constants";
+} from "../../Connectors/Metamask";
+import { maiAddresses, MAIFACTORIES, PROVIDERS } from "../../constants";
 
 const LiquidateButton: React.FC = () => {
   const record = useRecordContext();

@@ -15,7 +15,6 @@ import {
 import { BigNumber } from "ethers";
 import _ from "lodash/fp";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useChainId, useProvider } from "../Connectors/Metamask";
 import {
   isSlimContract,
   isV2Contract,
@@ -24,8 +23,9 @@ import {
   VaultContractSlim,
   VaultContractV1,
   VaultContractV2,
-} from "./types";
-import { saveTemplateAsFile } from "./utils/files";
+} from "../components/types";
+import { saveTemplateAsFile } from "../components/utils/files";
+import { useChainId, useProvider } from "../Connectors/Metamask";
 
 interface VaultAdminContextInterface {
   includeInTx: {
