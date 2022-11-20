@@ -1,6 +1,6 @@
 import LoadingButton from "@mui/lab/LoadingButton";
 import * as MUI from "@mui/material";
-import { TextField } from "@mui/material";
+import { CircularProgress, TextField } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Unstable_Grid2";
 import {
@@ -25,6 +25,7 @@ import {
   VaultContractV2,
 } from "../components/types";
 import { saveTemplateAsFile } from "../components/utils/files";
+import { extractIPFSCID } from "../components/utils/urls";
 import { useChainId, useProvider } from "../Connectors/Metamask";
 
 interface VaultAdminContextInterface {
@@ -414,8 +415,15 @@ export default function VaultAdminPanel() {
   const metamaskProvider = useProvider();
   const chainId = useChainId() as ChainId;
   const [collateral, setCollateral] = useState(COLLATERALS[chainId]?.[0]);
+  const [imagePreview, setImagePreview] = useState<string | undefined>();
+  const [jsonPreview, setJsonPreview] = useState<string | undefined>();
+  const [loading, setLoading] = useState(false);
   const [vaultAdminContextState, setVaultAdminContextState] =
     useState<VaultAdminContextInterface>(defaultVaultAdminContext);
+
+  useEffect(() => {
+    setCollateral(COLLATERALS[chainId]?.[0]);
+  }, [chainId]);
 
   useEffect(() => {
     if (collateral && metamaskProvider) {
@@ -425,6 +433,7 @@ export default function VaultAdminPanel() {
       );
 
       const fetchVaultValues = async () => {
+        setLoading(true);
         setVaultAdminContextState(defaultVaultAdminContext);
         let calls: VaultValues = {
           adm: null,
@@ -514,11 +523,35 @@ export default function VaultAdminPanel() {
             setTokenURI: calls.tokenURI,
           },
         });
+        setLoading(false);
       };
 
       void fetchVaultValues();
     }
   }, [collateral, metamaskProvider]);
+
+  useEffect(() => {
+    const fetchIPFSContent = async () => {
+      const CID = extractIPFSCID(
+        vaultAdminContextState.formValues.setTokenURI || ""
+      );
+      if (CID === "") return null;
+      else {
+        const res = await fetch(`https://dweb.link/ipfs/${CID}`);
+        const blob = await res.blob();
+        try {
+          const json = JSON.parse(await blob.text());
+          setJsonPreview(json);
+          setImagePreview(undefined);
+        } catch (e: any) {
+          setJsonPreview(undefined);
+          setImagePreview(URL.createObjectURL(blob));
+        }
+        return res;
+      }
+    };
+    void fetchIPFSContent();
+  }, [vaultAdminContextState.formValues.setTokenURI]);
 
   if (collateral && metamaskProvider) {
     const vaultContract = collateral.connect(
@@ -537,79 +570,101 @@ export default function VaultAdminPanel() {
               />
             </Grid>
             <Grid xs={6} />
-            <Grid xs={2}>
-              <LoadingButton
-                // disabled={titleError || submissionMade}
-                // loading={submissionMade}
-                variant="contained"
-                onClick={() =>
-                  generateTx(vaultContract, vaultAdminContextState)
-                }
-              >
-                Submit
-              </LoadingButton>
-            </Grid>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <Grid xs={2}>
+                  <LoadingButton
+                    // disabled={titleError || submissionMade}
+                    // loading={submissionMade}
+                    variant="contained"
+                    onClick={() =>
+                      generateTx(vaultContract, vaultAdminContextState)
+                    }
+                  >
+                    Submit
+                  </LoadingButton>
+                </Grid>
 
-            <Field
-              vaultContract={vaultContract}
-              label={"Gain Ratio"}
-              vaultMethod={VaultAdminSetMethod.setGainRatio}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Min Debt"}
-              vaultMethod={VaultAdminSetMethod.setMinDebt}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Max Debt"}
-              vaultMethod={VaultAdminSetMethod.setMaxDebt}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Interest Rate"}
-              vaultMethod={VaultAdminSetMethod.setInterestRate}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Opening Fee"}
-              vaultMethod={VaultAdminSetMethod.setOpeningFee}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Burn"}
-              vaultMethod={VaultAdminSetMethod.burn}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Admin"}
-              vaultMethod={VaultAdminSetMethod.setAdmin}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Price Source"}
-              vaultMethod={VaultAdminSetMethod.changeEthPriceSource}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Ref"}
-              vaultMethod={VaultAdminSetMethod.setRef}
-              decimals={2}
-            />
-            <Field
-              vaultContract={vaultContract}
-              label={"Token URI"}
-              vaultMethod={VaultAdminSetMethod.setTokenURI}
-              decimals={2}
-            />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Gain Ratio"}
+                  vaultMethod={VaultAdminSetMethod.setGainRatio}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Min Debt"}
+                  vaultMethod={VaultAdminSetMethod.setMinDebt}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Max Debt"}
+                  vaultMethod={VaultAdminSetMethod.setMaxDebt}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Interest Rate"}
+                  vaultMethod={VaultAdminSetMethod.setInterestRate}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Opening Fee"}
+                  vaultMethod={VaultAdminSetMethod.setOpeningFee}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Burn"}
+                  vaultMethod={VaultAdminSetMethod.burn}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Admin"}
+                  vaultMethod={VaultAdminSetMethod.setAdmin}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Price Source"}
+                  vaultMethod={VaultAdminSetMethod.changeEthPriceSource}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Ref"}
+                  vaultMethod={VaultAdminSetMethod.setRef}
+                  decimals={2}
+                />
+                <Field
+                  vaultContract={vaultContract}
+                  label={"Token URI"}
+                  vaultMethod={VaultAdminSetMethod.setTokenURI}
+                  decimals={2}
+                />
+                <Grid xs={12}>
+                  {jsonPreview ? (
+                    <pre>{JSON.stringify(jsonPreview, null, 2)}</pre>
+                  ) : (
+                    <></>
+                  )}
+                  {imagePreview ? (
+                    <img
+                      style={{ maxWidth: "350px" }}
+                      src={imagePreview}
+                      alt={""}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </Grid>
+              </>
+            )}
           </Grid>
         </VaultAdminContext.Provider>
       </VaultAdminDispatchContext.Provider>
