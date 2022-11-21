@@ -11,7 +11,8 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Contract } from "ethcall";
 import fakeDataProvider from "ra-data-fakerest";
-import React from "react";
+import React, {useLayoutEffect} from 'react';
+
 import {
   Admin,
   CustomRoutes,
