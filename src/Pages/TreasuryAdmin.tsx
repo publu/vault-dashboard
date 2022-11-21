@@ -31,12 +31,12 @@ import {
   useUnselect,
 } from "react-admin";
 import { TxForTxBuilder } from "../components/types";
-import { shortenAddress } from "../components/utils/addresses";
-import { saveTemplateAsFile } from "../components/utils/files";
 import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
 import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
+import { shortenAddress } from "../utils/addresses";
+import { saveTemplateAsFile } from "../utils/files";
 import { getId } from "../utils/utils";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address

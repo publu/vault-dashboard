@@ -1,20 +1,12 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import * as MUI from "@mui/material";
 import { CircularProgress, TextField } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Unstable_Grid2";
-import {
-  ChainId,
-  COLLATERAL,
-  COLLATERAL_V2,
-  COLLATERALS,
-  GAUGE_VALID_COLLATERAL,
-  GAUGE_VALID_COLLATERAL_V2,
-  OG_MATIC_VAULT,
-} from "@qidao/sdk";
+import { ChainId, COLLATERALS, OG_MATIC_VAULT } from "@qidao/sdk";
 import { BigNumber } from "ethers";
 import _ from "lodash/fp";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import CollateralSelector from "../components/common/CollateralSelector";
 import {
   isSlimContract,
   isV2Contract,
@@ -24,9 +16,9 @@ import {
   VaultContractV1,
   VaultContractV2,
 } from "../components/types";
-import { saveTemplateAsFile } from "../components/utils/files";
-import { extractIPFSCID } from "../components/utils/urls";
 import { useChainId, useProvider } from "../Connectors/Metamask";
+import { saveTemplateAsFile } from "../utils/files";
+import { extractIPFSCID } from "../utils/urls";
 
 interface VaultAdminContextInterface {
   includeInTx: {
@@ -174,48 +166,6 @@ const Field: React.FC<{
     );
   }
 };
-
-const CollateralSelector: React.FC<{
-  selectedCollateral:
-    | COLLATERAL
-    | COLLATERAL_V2
-    | GAUGE_VALID_COLLATERAL
-    | GAUGE_VALID_COLLATERAL_V2;
-  setSelectedCollateral: Function;
-}> = ({ selectedCollateral, setSelectedCollateral }) => {
-  const chainId = useChainId() as ChainId;
-  if (!chainId) {
-    return <></>;
-  }
-  const collateralsForChain = COLLATERALS[chainId] || [];
-  return (
-    <MUI.FormControl fullWidth>
-      <MUI.InputLabel id="demo-simple-select-label">Collateral</MUI.InputLabel>
-      <MUI.Select
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
-        value={selectedCollateral.vaultAddress}
-        label="Collateral"
-        onChange={(e) => {
-          const collateralVaultAddress = e.target.value;
-          const newSelectedCollateral = collateralsForChain?.find(
-            (c) => c.vaultAddress === collateralVaultAddress
-          );
-          setSelectedCollateral(newSelectedCollateral);
-        }}
-      >
-        {collateralsForChain.map((co) => {
-          return (
-            <MUI.MenuItem key={co.vaultAddress} value={co.vaultAddress}>
-              {co.token.name}
-            </MUI.MenuItem>
-          );
-        })}
-      </MUI.Select>
-    </MUI.FormControl>
-  );
-};
-
 interface VaultValues {
   ethPriceSource: null | string;
   gainRatio: null | BigNumber;
@@ -420,10 +370,6 @@ export default function VaultAdminPanel() {
   const [loading, setLoading] = useState(false);
   const [vaultAdminContextState, setVaultAdminContextState] =
     useState<VaultAdminContextInterface>(defaultVaultAdminContext);
-
-  useEffect(() => {
-    setCollateral(COLLATERALS[chainId]?.[0]);
-  }, [chainId]);
 
   useEffect(() => {
     if (collateral && metamaskProvider) {
