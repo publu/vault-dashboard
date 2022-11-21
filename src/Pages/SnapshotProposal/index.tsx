@@ -12,7 +12,7 @@ import {
 import snapshot from "@snapshot-labs/snapshot.js";
 import { addDays, getUnixTime } from "date-fns/fp"; // Grid version 2
 import React, { useState } from "react";
-import { useAccount, useChainId, useProvider } from "../Connectors/Metamask";
+import { useAccount, useChainId, useProvider } from "../../Connectors/Metamask";
 import CheckboxList from "./CheckBoxList";
 
 const hub = "https://hub.snapshot.org"; // or https://testnet.snapshot.org for testnet
