@@ -125,7 +125,7 @@ export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.MILKOMEDA]: "https://rpc-mainnet-cardano-evm.c1.milkomeda.com",
   [ChainId.KAVA]: "https://evm.kava.io",
   [ChainId.IOTEX]: "https://rpc.ankr.com/iotex",
-  [ChainId.KLAYTN]: "https://klaytn01.fandom.finance",
+/*  [ChainId.KLAYTN]: "https://klaytn01.fandom.finance",*/
   [ChainId.CELO]: "https://forno.celo.org",
   [ChainId.AURORA]: "https://mainnet.aurora.dev",
   [ChainId.BOBA]: "https://mainnet.boba.network",
