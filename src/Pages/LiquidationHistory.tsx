@@ -1,35 +1,71 @@
 import Grid from "@mui/material/Unstable_Grid2";
 import { COLLATERALS } from "@qidao/sdk";
-import React from "react";
+import Fuse from "fuse.js";
+import React, { useState } from "react";
 import {
   Datagrid,
   DateField,
+  FilterForm,
   ListContextProvider,
   NumberField,
+  Pagination,
+  SearchInput,
   TextField,
   useList,
 } from "react-admin";
 import { OnChainHexField } from "../components/common/OnChainHexField";
 import { useLiquidationHistory } from "../utils/liquidationHistory";
 
+const fuseOptions = {
+  // isCaseSensitive: false,
+  // includeScore: false,
+  // shouldSort: true,
+  // includeMatches: false,
+  // findAllMatches: false,
+  // minMatchCharLength: 1,
+  // location: 0,
+  // threshold: 0.6,
+  // distance: 100,
+  // useExtendedSearch: false,
+  // ignoreLocation: false,
+  // ignoreFieldNorm: false,
+  // fieldNormWeight: 1,
+  keys: ["chainId", "tokenName"],
+};
 export default function LiquidationHistory(): JSX.Element {
   const collaterals = Object.values(COLLATERALS).flat();
-  console.log(collaterals);
+  const [filter, setFilter] = useState("");
   const liq = useLiquidationHistory(collaterals);
   const liquidationLogs = liq.flatMap(({ data }) => (data ? data : []));
+  const fuse = new Fuse(liquidationLogs, fuseOptions);
+  const logsAfterSearch = new Set(
+    fuse.search(filter).map((res) => res.item.id)
+  );
   const liquidationLogList = useList({
+    perPage: 25,
     data: liquidationLogs,
+    filterCallback: (record) => {
+      if (!filter || filter === "") return true;
+      return logsAfterSearch.has(record.id);
+    },
   });
 
-  console.log({ liquidationLogs });
+  const filters = [<SearchInput source="q" size="small" alwaysOn name="q" />];
+  const setFilters = (filters: any) => {
+    console.log({ filters });
+    setFilter(filters.q);
+  };
 
   if (!collaterals) return <></>;
   return (
-    <Grid container spacing={2}>
-      <Grid xs={4}></Grid>
-      <Grid xs={8} />
-      <Grid xs={12}>
-        <ListContextProvider value={liquidationLogList}>
+    <ListContextProvider
+      value={{ ...liquidationLogList, setFilters, filterValues: { q: filter } }}
+    >
+      <Grid container spacing={2}>
+        <Grid xs={12}>
+          <FilterForm filters={filters} />
+        </Grid>
+        <Grid xs={12}>
           <Datagrid optimized>
             <NumberField label="ChainId" source="chainId" />
             <NumberField label="Vault ID" source="args.vaultID" />
@@ -57,8 +93,12 @@ export default function LiquidationHistory(): JSX.Element {
               addressType="transaction"
             />
           </Datagrid>
-        </ListContextProvider>
+          <Pagination
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            defaultValue={50}
+          />
+        </Grid>
       </Grid>
-    </Grid>
+    </ListContextProvider>
   );
 }
