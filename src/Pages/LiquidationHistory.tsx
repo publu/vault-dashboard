@@ -1,6 +1,7 @@
 import Grid from "@mui/material/Unstable_Grid2";
 import { COLLATERALS } from "@qidao/sdk";
 import Fuse from "fuse.js";
+import { debounce } from "lodash";
 import React, { useState } from "react";
 import {
   Datagrid,
@@ -30,31 +31,47 @@ const fuseOptions = {
   // ignoreLocation: false,
   // ignoreFieldNorm: false,
   // fieldNormWeight: 1,
-  keys: ["chainId", "tokenName"],
+  keys: [
+    "chainId",
+    "tokenName",
+    "args.owner",
+    "args.buyer",
+    "args.collateralLiquidated",
+    "args.closingFee",
+    "args.debtRepaid",
+  ],
 };
 export default function LiquidationHistory(): JSX.Element {
   const collaterals = Object.values(COLLATERALS).flat();
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState<string | null>(null);
   const liq = useLiquidationHistory(collaterals);
   const liquidationLogs = liq.flatMap(({ data }) => (data ? data : []));
   const fuse = new Fuse(liquidationLogs, fuseOptions);
-  const logsAfterSearch = new Set(
-    fuse.search(filter).map((res) => res.item.id)
-  );
+  const filteredLiquidationLogs = !filter
+    ? liquidationLogs
+    : fuse.search(filter).map((r) => r.item);
   const liquidationLogList = useList({
     perPage: 25,
-    data: liquidationLogs,
-    filterCallback: (record) => {
-      if (!filter || filter === "") return true;
-      return logsAfterSearch.has(record.id);
-    },
+    data: filteredLiquidationLogs,
+    // filterCallback: (record) => {
+    //   if (!filter || filter === "") return true;
+    //   const { owner, buyer, collateralLiquidated, closingFee, debtRepaid } =
+    //     record.args;
+    //
+    //   const f = 1;
+    //   return (
+    //     record.tokenName.toLowerCase().includes(filter) ||
+    //     owner.toLowerCase().includes(filter) ||
+    //     buyer.toLowerCase().includes(filter) ||
+    //     collateralLiquidated.toString().includes(filter) ||
+    //     closingFee.toString().includes(filter) ||
+    //     debtRepaid.toString().includes(filter)
+    //   );
+    // },
   });
 
   const filters = [<SearchInput source="q" size="small" alwaysOn name="q" />];
-  const setFilters = (filters: any) => {
-    console.log({ filters });
-    setFilter(filters.q);
-  };
+  const setFilters = debounce((filters: any) => setFilter(filters.q), 600);
 
   if (!collaterals) return <></>;
   return (

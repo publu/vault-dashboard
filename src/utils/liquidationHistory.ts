@@ -83,13 +83,6 @@ export async function fetchLiquidationHistory(
   toBlock: number,
   address: string
 ): Promise<LiquidationHistoryResult | undefined> {
-  console.log({
-    has: chainHasScannerUrl(chainId),
-    chainId,
-    fromBlock,
-    toBlock,
-    address,
-  });
   if (chainHasScannerUrl(chainId)) {
     const url = chainScannerApiUrlBase[chainId];
     const q = scannerLimitQueues[url];
