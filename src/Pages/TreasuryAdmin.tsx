@@ -35,7 +35,7 @@ import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
 import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
-import { shortenAddress } from "../utils/addresses";
+import { shortenHex } from "../utils/addresses";
 import { saveTemplateAsFile } from "../utils/files";
 import { getId } from "../utils/utils";
 
@@ -123,7 +123,7 @@ const AddressField = (
 ) => {
   const record = useRecordContext(props);
   console.log(record);
-  return <span>{shortenAddress(record.owner)}</span>;
+  return <span>{shortenHex(record.owner)}</span>;
 };
 
 const ChainSelector: React.FC<{

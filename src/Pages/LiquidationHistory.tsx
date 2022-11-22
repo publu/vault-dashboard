@@ -1,78 +1,60 @@
 import Grid from "@mui/material/Unstable_Grid2";
-import { ChainId, COLLATERALS } from "@qidao/sdk";
-import { formatUnits } from "ethers/lib/utils";
-import React, { useState } from "react";
+import { COLLATERALS } from "@qidao/sdk";
+import React from "react";
 import {
   Datagrid,
-  FunctionField,
+  DateField,
   ListContextProvider,
   NumberField,
+  TextField,
   useList,
 } from "react-admin";
-import CollateralSelector from "../components/common/CollateralSelector";
-import { useChainId } from "../Connectors/Metamask";
-import { shortenAddress } from "../utils/addresses";
-import {
-  LiquidationLog,
-  useLiquidationHistory,
-} from "../utils/liquidationHistory";
+import { OnChainHexField } from "../components/common/OnChainHexField";
+import { useLiquidationHistory } from "../utils/liquidationHistory";
 
 export default function LiquidationHistory(): JSX.Element {
-  const chainId = useChainId() as ChainId;
-  const [collateral, setCollateral] = useState(COLLATERALS[chainId]?.[0]);
-  const liq = useLiquidationHistory(collateral);
+  const collaterals = Object.values(COLLATERALS).flat();
+  console.log(collaterals);
+  const liq = useLiquidationHistory(collaterals);
+  const liquidationLogs = liq.flatMap(({ data }) => (data ? data : []));
   const liquidationLogList = useList({
-    data: liq,
+    data: liquidationLogs,
   });
 
-  if (!collateral) return <></>;
-  console.log(liq);
+  console.log({ liquidationLogs });
 
+  if (!collaterals) return <></>;
   return (
     <Grid container spacing={2}>
-      <Grid xs={4}>
-        <CollateralSelector
-          selectedCollateral={collateral}
-          setSelectedCollateral={setCollateral}
-        />
-      </Grid>
+      <Grid xs={4}></Grid>
       <Grid xs={8} />
       <Grid xs={12}>
         <ListContextProvider value={liquidationLogList}>
-          <Datagrid>
+          <Datagrid optimized>
+            <NumberField label="ChainId" source="chainId" />
             <NumberField label="Vault ID" source="args.vaultID" />
-            <FunctionField
-              label="Buyer"
-              render={(record: LiquidationLog) => {
-                return shortenAddress(record.args.buyer);
-              }}
-            />
-            <FunctionField
-              label="Closing Fee"
-              render={(record: LiquidationLog) =>
-                formatUnits(record.args.closingFee, "18")
-              }
-            />
-            <FunctionField
-              label="Collateral Liquidated"
-              render={(record: LiquidationLog) =>
-                formatUnits(
-                  record.args.collateralLiquidated,
-                  collateral?.token.decimals
-                )
-              }
-            />
-            <FunctionField
-              label="Debt Repaid"
-              render={(record: LiquidationLog) =>
-                formatUnits(record.args.debtRepaid, "18")
-              }
-            />
-            <FunctionField
+            <TextField label="Token" source="tokenName" />
+            <OnChainHexField
               label="Owner"
-              render={(record: LiquidationLog) => {
-                return shortenAddress(record.args.owner);
-              }}
+              source="args.owner"
+              addressType="address"
+            />
+            <OnChainHexField
+              label="Buyer"
+              source="args.buyer"
+              addressType="address"
+            />
+            <NumberField label="Closing Fee" source="args.closingFee" />
+            <NumberField
+              label="Collateral Liquidated"
+              source="args.collateralLiquidated"
+            />
+            <NumberField label="Debt Repaid" source="args.debtRepaid" />
+            <DateField label="Tx Timestamp" source="timestamp" />
+            <OnChainHexField
+              label="TX"
+              source="transactionHash"
+              addressType="transaction"
             />
           </Datagrid>
         </ListContextProvider>
