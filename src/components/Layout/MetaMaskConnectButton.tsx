@@ -25,7 +25,7 @@ export const NetworkButton: React.FC<{ title: string }> = ({ title }) => {
     );
   }
 
-  console.log({ active, isActivating, provider, chainId });
+  // console.log({ active, isActivating, provider, chainId });
 
   return (
     <button onClick={() => metaMask.activate()} title={title}>

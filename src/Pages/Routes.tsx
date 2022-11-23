@@ -6,9 +6,13 @@ import {
   GAUGE_VALID_COLLATERAL,
   GAUGE_VALID_COLLATERAL_V2,
 } from "@qidao/sdk";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Contract } from "ethcall";
 import fakeDataProvider from "ra-data-fakerest";
-import React, { useLayoutEffect } from "react";
+import React, {useLayoutEffect} from 'react';
+
 import {
   Admin,
   CustomRoutes,
@@ -23,6 +27,7 @@ import { ChainName } from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
+import LiquidationHistory from "./LiquidationHistory";
 import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultAdminPanel from "./VaultAdminPanel";
@@ -173,6 +178,20 @@ function generateEmptyVault(
   };
 }
 
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+});
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 300_000,
+      refetchOnMount: false,
+      cacheTime: 1000 * 60 * 60 * 24,
+    },
+  },
+});
+
 const Routes: React.FC = () => {
   const dataProvider = fakeDataProvider({
     vaults: [],
@@ -184,16 +203,28 @@ const Routes: React.FC = () => {
   );
 
   return (
-    <BrowserRouter>
-      <Admin dataProvider={dataProvider} theme={theme} layout={Layout}>
-        <Resource name={"vaults"} list={VaultList} />
-        <CustomRoutes>
-          <Route path="/treasury-admin" element={<TreasuryAdmin />} />
-          <Route path="/snapshot-proposal" element={<SnapshotProposal />} />
-          <Route path="/vault-admin-management" element={<VaultAdminPanel />} />
-        </CustomRoutes>
-      </Admin>
-    </BrowserRouter>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
+      <BrowserRouter>
+        <Admin dataProvider={dataProvider} theme={theme} layout={Layout}>
+          <Resource name={"vaults"} list={VaultList} />
+          <CustomRoutes>
+            <Route path="/treasury-admin" element={<TreasuryAdmin />} />
+            <Route path="/snapshot-proposal" element={<SnapshotProposal />} />
+            <Route
+              path="/vault-admin-management"
+              element={<VaultAdminPanel />}
+            />
+            <Route
+              path="/liquidation-history"
+              element={<LiquidationHistory />}
+            />
+          </CustomRoutes>
+        </Admin>
+      </BrowserRouter>
+    </PersistQueryClientProvider>
   );
 };
 
