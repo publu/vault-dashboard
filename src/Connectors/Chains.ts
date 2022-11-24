@@ -1,18 +1,18 @@
 import type { AddEthereumChainParameter } from "@web3-react/types";
 import arbitrumNetworkIcon from "../imgs/logos/chains/arbitrum-network.jpg";
+import auroraNetworkIcon from "../imgs/logos/chains/aurora-network.png";
 import avalancheNetworkIcon from "../imgs/logos/chains/avalanche-network.jpg";
+import bobaTokenIcon from "../imgs/logos/chains/boba-token.svg";
 import bscNetworkIcon from "../imgs/logos/chains/bsc-network.jpg";
+import celoNetworkIcon from "../imgs/logos/chains/celo-network.png";
 import cronosNetworkIcon from "../imgs/logos/chains/cronos-network.jpg";
+import fantomNetworkIcon from "../imgs/logos/chains/fantom-network.jpg";
 import gnosisNetworkIcon from "../imgs/logos/chains/gnosis-chain-network.jpg";
 import harmonyNetworkIcon from "../imgs/logos/chains/harmonyone-network.jpg";
+import iotexNetworkIcon from "../imgs/logos/chains/iotex-network.png";
+import metisNetworkIcon from "../imgs/logos/chains/metis-network.png";
 import moonriverNetworkIcon from "../imgs/logos/chains/moonriver-network.jpg";
 import polygonNetworkIcon from "../imgs/logos/chains/polygon-network.jpg";
-import bobaTokenIcon from "../imgs/logos/chains/boba-token.svg";
-import metisNetworkIcon from "../imgs/logos/chains/metis-network.png";
-import iotexNetworkIcon from "../imgs/logos/chains/iotex-network.png";
-import celoNetworkIcon from "../imgs/logos/chains/celo-network.png";
-import auroraNetworkIcon from "../imgs/logos/chains/aurora-network.png";
-import fantomNetworkIcon from "../imgs/logos/chains/fantom-network.jpg";
 
 const ETH: AddEthereumChainParameter["nativeCurrency"] = {
   name: "Ether",
@@ -120,39 +120,6 @@ export function getAddChainParameters(
   }
   return;
 }
-
-export const ChainId = {
-  MAINNET: 1,
-  ROPSTEN: 3,
-  RINKEBY: 4,
-  GORLI: 5,
-  OPTIMISM: 10,
-  CRONOS: 25,
-  KOVAN: 42,
-  BSC: 56,
-  BSC_TESTNET: 97,
-  XDAI: 100,
-  HECO: 128,
-  HECO_TESTNET: 256,
-  MATIC: 137,
-  MATIC_TESTNET: 80001,
-  FANTOM: 250,
-  FANTOM_TESTNET: 4002,
-  BOBA: 288,
-  METIS: 1088,
-  MOONRIVER: 1285,
-  MOONBASE: 1287,
-  IOTEX: 4689,
-  ARBITRUM: 42161,
-  CELO: 42220,
-  AVALANCHE: 43114,
-  FUJI: 43113,
-  AURORA: 1313161554,
-  HARMONY: 1666600000,
-  HARMONY_TESTNET: 1666700000,
-} as const;
-
-export type ChainKey = typeof ChainId[keyof typeof ChainId];
 
 export const CHAINS: {
   [chainId: number]: BasicChainInformation | ExtendedChainInformation;
