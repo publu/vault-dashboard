@@ -11,7 +11,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Contract } from "ethcall";
 import fakeDataProvider from "ra-data-fakerest";
-import React, {useLayoutEffect} from 'react';
+import React, { useLayoutEffect } from "react";
 
 import {
   Admin,
@@ -32,6 +32,7 @@ import SnapshotProposal from "./SnapshotProposal";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultAdminPanel from "./VaultAdminPanel";
 import VaultList from "./VaultList";
+import ZapperAdmin from "./ZapperAdmin";
 
 let addedVaults = new Set();
 
@@ -221,6 +222,7 @@ const Routes: React.FC = () => {
               path="/liquidation-history"
               element={<LiquidationHistory />}
             />
+            <Route path="/zapper-admin" element={<ZapperAdmin />} />
           </CustomRoutes>
         </Admin>
       </BrowserRouter>

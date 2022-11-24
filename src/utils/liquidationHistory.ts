@@ -28,7 +28,7 @@ const chainScannerApiUrlBase = {
   [ChainId.OPTIMISM]: "api-optimistic.etherscan.io/api",
   [ChainId.SYSCOIN]: "explorer.syscoin.org/api",
   [ChainId.METIS]: "andromeda-explorer.metis.io/api",
-  [ChainId.MOONBEAM]: "api-moonbeam.moonscan.io",
+  [ChainId.MOONBEAM]: "api-moonbeam.moonscan.io/api",
   // [ChainId.MILKOMEDA]: "", //API points to localhost
   [ChainId.CELO]: "explorer.celo.org/api",
   [ChainId.AURORA]: "api.aurorascan.dev/api",
@@ -51,7 +51,7 @@ const scannerLimitQueues: { [k in ScannerUrl]: PQueue } = Object.fromEntries(
     (scannerBaseUrl) => {
       return [
         scannerBaseUrl,
-        new PQueue({ concurrency: 2, interval: 1000, intervalCap: 2 }),
+        new PQueue({ concurrency: 1, interval: 5100, intervalCap: 1 }),
       ];
     }
   )
@@ -86,15 +86,21 @@ export async function fetchLiquidationHistory(
   if (chainHasScannerUrl(chainId)) {
     const url = chainScannerApiUrlBase[chainId];
     const q = scannerLimitQueues[url];
-    const res = await q.add(
-      async () =>
-        await fetch(
-          `https://${url}?module=logs&action=getLogs` +
-            `&fromBlock=${fromBlock}&toBlock=${toBlock}&address=${address}` +
-            `&topic0=${TOPIC0}&apikey=${API_KEY}`
-        )
-    );
-    return await res.json();
+
+    while (true) {
+      const res = await q.add(
+        async () =>
+          await fetch(
+            `https://${url}?module=logs&action=getLogs` +
+              `&fromBlock=${fromBlock}&toBlock=${toBlock}&address=${address}` +
+              `&topic0=${TOPIC0}&apikey=${API_KEY}`
+          )
+      );
+      const resJson = await res.json();
+      if (resJson.message && resJson.message !== "NOTOK") {
+        return resJson;
+      }
+    }
   }
   return;
 }
@@ -170,28 +176,41 @@ export const useLiquidationHistory = (
                     topics: foo.topics,
                     data: foo.data,
                   });
+                  const vaultID = res.args.vaultID.toNumber();
+                  const buyer = res.args.buyer;
+                  const transactionHash = foo.transactionHash;
+                  const collateralLiquidated = bigNumberToFloat(
+                    res.args.collateralLiquidated,
+                    collateral.token.decimals
+                  );
+                  if (!buyer) {
+                    debugger;
+                  }
+                  const id = [
+                    transactionHash,
+                    buyer,
+                    vaultID,
+                    collateralLiquidated,
+                  ].join("-");
                   return {
                     ...res,
-                    transactionHash: foo.transactionHash,
+                    transactionHash: transactionHash,
                     timestamp: fromUnixTime(
                       BigNumber.from(foo.timeStamp).toNumber()
                     ),
-                    id: foo.transactionHash,
+                    id,
                     tokenName: collateral.token.name || "",
                     chainId: collateral.chainId,
                     args: {
-                      buyer: res.args.buyer,
+                      buyer: buyer,
                       closingFee: bigNumberToFloat(
                         res.args.closingFee,
                         collateral.token.decimals
                       ),
-                      collateralLiquidated: bigNumberToFloat(
-                        res.args.collateralLiquidated,
-                        collateral.token.decimals
-                      ),
+                      collateralLiquidated: collateralLiquidated,
                       debtRepaid: bigNumberToFloat(res.args.debtRepaid),
                       owner: res.args.owner,
-                      vaultID: res.args.vaultID.toNumber(),
+                      vaultID: vaultID,
                     },
                   };
                 }
