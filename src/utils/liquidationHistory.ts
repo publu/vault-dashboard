@@ -188,8 +188,6 @@ export const useLiquidationHistory = (
                   }
                   const id = [
                     transactionHash,
-                    buyer,
-                    vaultID,
                     collateralLiquidated,
                   ].join("-");
                   return {

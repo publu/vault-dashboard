@@ -51,7 +51,7 @@ export default function LiquidationHistory(): JSX.Element {
     ? liquidationLogs
     : fuse.search(filter).map((r) => r.item);
   const liquidationLogList = useList({
-    perPage: 25,
+    perPage: 50,
     data: filteredLiquidationLogs,
     // filterCallback: (record) => {
     //   if (!filter || filter === "") return true;
