@@ -8,6 +8,7 @@ import {
 } from "@qidao/sdk";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Contract } from "ethcall";
 import fakeDataProvider from "ra-data-fakerest";
@@ -186,7 +187,7 @@ const persister = createSyncStoragePersister({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 300_000,
+      staleTime: 500_000,
       refetchOnMount: false,
       cacheTime: 1000 * 60 * 60 * 24,
     },
@@ -226,6 +227,7 @@ const Routes: React.FC = () => {
           </CustomRoutes>
         </Admin>
       </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
     </PersistQueryClientProvider>
   );
 };

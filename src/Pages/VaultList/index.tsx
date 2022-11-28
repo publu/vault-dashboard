@@ -5,10 +5,10 @@ import {
   FilterButton,
   List,
   NumberField,
+  Pagination,
   TextField,
   TopToolbar,
 } from "react-admin";
-import DashPagination from "./DashPagination";
 import { DeepLinkField } from "./DeepLinkField";
 import LoadingDisplay from "./LoadingDisplay";
 import searchFilters from "./Search";
@@ -25,7 +25,7 @@ const VaultList: React.FC = () => {
     <List
       actions={<ListActions />}
       perPage={100}
-      pagination={<DashPagination />}
+      pagination={<Pagination rowsPerPageOptions={[25, 100, 200, 500]} />}
       empty={<LoadingDisplay />}
       queryOptions={{ refetchInterval: 1000 }}
       filters={searchFilters}
