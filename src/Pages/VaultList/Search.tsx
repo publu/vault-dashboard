@@ -1,6 +1,6 @@
 import { Chip } from "@mui/material";
 import React from "react";
-import { TextInput, useTranslate } from "react-admin";
+import { NumberInput, TextInput, useTranslate } from "react-admin";
 
 interface filterProps {
   label: string;
@@ -14,6 +14,9 @@ const QuickFilter: React.FC<filterProps> = ({ label }) => {
 };
 const searchFilters = [
   <TextInput label="Search" source="q" alwaysOn />,
+  <NumberInput source="debt_gte" label="Debt Greater Than" />,
+  <NumberInput source="debt_lte" label="Debt Less Than" />,
+
   <QuickFilter
     label="Has Collateral"
     source="collateral_gt"

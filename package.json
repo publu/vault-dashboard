@@ -22,6 +22,7 @@
     "@snapshot-labs/snapshot.js": "^0.4.40",
     "@tanstack/query-sync-storage-persister": "^4.15.1",
     "@tanstack/react-query": "^4.16.1",
+    "@tanstack/react-query-devtools": "^4.18.0",
     "@tanstack/react-query-persist-client": "^4.16.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
