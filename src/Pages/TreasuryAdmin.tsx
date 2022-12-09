@@ -293,7 +293,7 @@ const TreasuryAdmin = () => {
           metamaskProvider
         );
         if (isCamZappable(vault.vaultAddress)) {
-          const camZapperAddress = CAMZAPPER_ADDRESS[vault.chainId];
+          const camZapperAddress = CAMZAPPER_ADDRESS[ChainId.MATIC];
           if (camZapperAddress) {
             const camZapperContract = CamZapper__factory.connect(
               camZapperAddress,
