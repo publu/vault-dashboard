@@ -66,7 +66,7 @@ Note: Qi holders will be able to vote from any chain that has QI.
           type: "weighted",
           title: snapshotTitle,
           body: snapshotProposalText,
-          choices: choices.map((c) => c.snapshotName),
+          choices: checked.map((c) => c.snapshotName),
           start: getUnixTime(startDateTime),
           end: getUnixTime(endDateTime),
           snapshot: blockNumber,
