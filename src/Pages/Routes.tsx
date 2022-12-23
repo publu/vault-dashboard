@@ -30,6 +30,7 @@ import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
 import LiquidationHistory from "./LiquidationHistory";
 import SnapshotProposal from "./SnapshotProposal";
+import Timelock from "./Timelock";
 import TreasuryAdmin from "./TreasuryAdmin";
 import VaultAdminPanel from "./VaultAdminPanel";
 import VaultList from "./VaultList";
@@ -224,6 +225,7 @@ const Routes: React.FC = () => {
               element={<LiquidationHistory />}
             />
             <Route path="/zapper-admin" element={<ZapperAdmin />} />
+            <Route path="/timelock" element={<Timelock />} />
           </CustomRoutes>
         </Admin>
       </BrowserRouter>
