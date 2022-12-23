@@ -4,6 +4,7 @@ import BallotIcon from "@mui/icons-material/Ballot";
 import CurrencyBitcoinIcon from "@mui/icons-material/CurrencyBitcoin";
 import FlashAutoIcon from "@mui/icons-material/FlashAuto";
 import HistoryIcon from "@mui/icons-material/History";
+import LockClockIcon from "@mui/icons-material/LockClock";
 import * as React from "react";
 import * as RA from "react-admin";
 
@@ -38,6 +39,11 @@ export const MyMenu = (props: JSX.IntrinsicAttributes & RA.MenuProps) => (
       to="/zapper-admin"
       primaryText="Zapper Admin"
       leftIcon={<FlashAutoIcon />}
+    />
+    <RA.Menu.Item
+      to="/timelock"
+      primaryText="Timelock"
+      leftIcon={<LockClockIcon />}
     />
     {/*<RA.Menu.Item to="/users" primaryText="Users" leftIcon={<PeopleIcon />}/>*/}
     {/*<RA.Menu.Item to="/custom-route" primaryText="Miscellaneous" leftIcon={<LabelIcon />}/>*/}
