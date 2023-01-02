@@ -12,6 +12,7 @@ import {
 } from "react-hook-form";
 import { useProvider } from "../Connectors/Metamask";
 import { SimpleTimelock__factory } from "../contracts";
+import { saveTemplateAsFile } from "../utils/files";
 
 const TIMELOCK_ADDRESS = "0x257FF75BEf85ca0C1517168Ef27EFc69e5c7016f";
 interface ITimelockQueueTxForm {
@@ -68,11 +69,27 @@ function QueueForm() {
       provider
     );
 
-    const tx = await timelock.queue(_target, _value, _func, _data, _timestamp);
-
-    setIsWaitingOnTx(true);
-    await tx.wait(1);
-    setIsWaitingOnTx(false);
+    const tx = await timelock.populateTransaction.queue(
+      _target,
+      _value,
+      _func,
+      _data,
+      _timestamp
+    );
+    const gnosisTx = [
+      {
+        description: `Timelock TX`,
+        raw: {
+          to: TIMELOCK_ADDRESS,
+          value: "0",
+          data: tx.data || "",
+        },
+      },
+    ];
+    saveTemplateAsFile("timelock.json", gnosisTx);
+    // setIsWaitingOnTx(true);
+    // await tx.wait(1);
+    // setIsWaitingOnTx(false);
   };
 
   return (
@@ -123,9 +140,20 @@ function ExecuteForm() {
       }
     );
 
-    setIsWaitingOnTx(true);
-    await tx.wait(1);
-    setIsWaitingOnTx(false);
+    const gnosisTx = [
+      {
+        description: `Timelock TX`,
+        raw: {
+          to: TIMELOCK_ADDRESS,
+          value: "0",
+          data: tx.data || "",
+        },
+      },
+    ];
+    saveTemplateAsFile("timelock.json", gnosisTx);
+    // setIsWaitingOnTx(true);
+    // await tx.wait(1);
+    // setIsWaitingOnTx(false);
   };
 
   return (
