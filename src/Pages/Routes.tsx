@@ -163,7 +163,7 @@ function generateEmptyVault(
     "/" +
     c.shortName +
     "/0";
-  const contract = new Contract(c.vaultAddress, c.contractAbi);
+  const contract = new Contract(c.vaultAddress, c.contractAbi as any);
   return {
     ...c,
     id: `${c.chainId}-${c.token.symbol}-${0}`,

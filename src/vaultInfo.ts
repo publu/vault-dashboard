@@ -46,7 +46,7 @@ export async function fetchVaultInfo(
   const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId]);
   const vaultContract = new Contract(
     collateral.vaultAddress,
-    collateral.contractAbi
+    collateral.contractAbi as any
   );
   const totalSupplyCall = vaultContract.vaultCount(); // because totalSupply isn't all-encompassing.
   const collateralPriceCall = vaultContract.getEthPriceSource();
