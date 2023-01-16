@@ -8,8 +8,6 @@ import {
 
 export const ChainName: { [chainId in ChainId]: string } = {
   [ChainId.MAINNET]: "Ethereum",
-  [ChainId.RINKEBY]: "Rinkeby",
-  [ChainId.ROPSTEN]: "Ropsten",
   [ChainId.GÖRLI]: "Görli",
   [ChainId.KOVAN]: "Kovan",
   [ChainId.FANTOM]: "Fantom",
@@ -65,9 +63,7 @@ export const maiAddresses: { [index: string]: any } = {
 
 export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
-  [ChainId.ROPSTEN]: "0x53C43764255c17BD724F74c4eF150724AC50a3ed",
   [ChainId.KOVAN]: "0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A",
-  [ChainId.RINKEBY]: "0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821",
   [ChainId.GÖRLI]: "0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e",
   [ChainId.FANTOM]: "0x63B8310c5093ac917552931D8b15d5AB6945c0a6",
   [ChainId.FANTOM_TESTNET]: "",
@@ -94,10 +90,6 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
 export const RPCS: { [chainId in ChainId]: string } = {
   [ChainId.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [ChainId.MAINNET]: "https://rpc.ankr.com/eth",
-  [ChainId.ROPSTEN]:
-    "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-  [ChainId.RINKEBY]:
-    "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
   [ChainId.GÖRLI]:
     "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161\n",
   [ChainId.KOVAN]:
@@ -133,9 +125,7 @@ export const RPCS: { [chainId in ChainId]: string } = {
 };
 
 const SKIP_RPCS = [
-  ChainId.ROPSTEN,
   ChainId.GÖRLI,
-  ChainId.RINKEBY,
   ChainId.KOVAN,
   ChainId.HARMONY_TESTNET,
   ChainId.HECO,

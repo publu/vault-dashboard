@@ -19,10 +19,6 @@ export const RPC = {
   [ChainId.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [ChainId.MAINNET]:
     "https://eth-mainnet.alchemyapi.io/v2/q1gSNoSMEzJms47Qn93f9-9Xg5clkmEC",
-  [ChainId.ROPSTEN]:
-    "https://eth-ropsten.alchemyapi.io/v2/cidKix2Xr-snU3f6f6Zjq_rYdalKKHmW",
-  [ChainId.RINKEBY]:
-    "https://eth-rinkeby.alchemyapi.io/v2/XVLwDlhGP6ApBXFz_lfv0aZ6VmurWhYD",
   [ChainId.KOVAN]:
     "https://eth-kovan.alchemyapi.io/v2/6OVAa_B_rypWWl9HqtiYK26IRxXiYqER",
   [ChainId.FANTOM]: "https://rpc.ftm.tools/",
