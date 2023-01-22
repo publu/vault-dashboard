@@ -213,7 +213,7 @@ const fetchVaultZeroes = async (
   const VAULT_IDX = 0;
   //TODO make the ordering link between collaterals and calls more explict
   const depositedCollateralCalls = collaterals.map((c) => {
-    const vaultContract = new Contract(c.vaultAddress, c.contractAbi);
+    const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any);
     return vaultContract.vaultCollateral(VAULT_IDX);
   });
   const depositedCollaterals = await multicall(
@@ -226,7 +226,7 @@ const fetchVaultZeroes = async (
       c.vaultAddress !== OG_MATIC_VAULT
         ? c.vaultAddress
         : "0x6AF1d9376a7060488558cfB443939eD67Bb9b48d";
-    const vaultContract = new Contract(vaultAddress, c.contractAbi);
+    const vaultContract = new Contract(vaultAddress, c.contractAbi as any);
     return vaultContract.ownerOf(VAULT_IDX);
   });
   const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls);

@@ -31,7 +31,7 @@ export interface VaultInfo extends COLLATERAL {
 export interface GaugeValidVaultInfo extends VaultInfo {}
 
 export interface VaultInfoV2
-  extends Omit<VaultInfo, "version">,
+  extends Omit<VaultInfo, "version" | "connect" | "contractAbi">,
     COLLATERAL_V2 {}
 
 export interface GaugeValidVaultInfoV2 extends VaultInfoV2 {}
@@ -46,7 +46,7 @@ export async function fetchVaultInfo(
   const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId]);
   const vaultContract = new Contract(
     collateral.vaultAddress,
-    collateral.contractAbi
+    collateral.contractAbi as any
   );
   const totalSupplyCall = vaultContract.vaultCount(); // because totalSupply isn't all-encompassing.
   const collateralPriceCall = vaultContract.getEthPriceSource();

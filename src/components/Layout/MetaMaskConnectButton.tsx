@@ -1,20 +1,11 @@
 import React, { useEffect } from "react";
-import {
-  metaMask,
-  useChainId,
-  useIsActivating,
-  useIsActive,
-  useProvider,
-} from "../../Connectors/Metamask";
+import { metaMask, useIsActive } from "../../Connectors/Metamask";
 
 export const NetworkButton: React.FC<{ title: string }> = ({ title }) => {
   const active = useIsActive();
-  const isActivating = useIsActivating();
-  const provider = useProvider();
-  const chainId = useChainId();
 
   useEffect(() => {
-    metaMask.connectEagerly();
+    void metaMask.connectEagerly();
   }, []);
 
   if (active) {
