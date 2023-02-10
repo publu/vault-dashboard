@@ -41,7 +41,10 @@ Note: Qi holders will be able to vote from any chain that has QI.
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSnapshotProposalText(event.target.value);
   };
-  const choices = Object.values(COLLATERALS).flat().filter(isGaugeValid);
+  const choices = Object.values(COLLATERALS).flat().filter(isGaugeValid) as (
+    | GAUGE_VALID_COLLATERAL
+    | GAUGE_VALID_COLLATERAL_V2
+  )[];
 
   const [checked, setChecked] =
     useState<(GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2)[]>(choices);

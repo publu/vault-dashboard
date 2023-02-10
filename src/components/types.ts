@@ -9,9 +9,9 @@ import {
   Erc20QiStablecoincamwbtc,
   Erc20QiStablecoinwbtc,
   Erc20Stablecoin,
+  QiStablecoin,
   StableQiVault,
 } from "@qidao/sdk";
-import { QiStablecoin } from "../contracts";
 
 export type TxForTxBuilder = { description: string; raw: MetaTransactionData };
 
