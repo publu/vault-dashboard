@@ -38,9 +38,12 @@ const CollateralSelector: React.FC<{
         label="Collateral"
         onChange={(e) => {
           const collateralVaultAddress = e.target.value;
-          const newSelectedCollateral = collateralsForChain?.find(
-            (c) => c.vaultAddress === collateralVaultAddress
-          );
+          let newSelectedCollateral: COLLATERAL | COLLATERAL_V2 | undefined;
+          collateralsForChain?.forEach((c) => {
+            if (c.vaultAddress === collateralVaultAddress) {
+              newSelectedCollateral = c;
+            }
+          });
           setSelectedCollateral(newSelectedCollateral);
         }}
       >

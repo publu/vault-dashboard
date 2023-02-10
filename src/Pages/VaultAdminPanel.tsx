@@ -12,9 +12,6 @@ import {
   isV2Contract,
   TxForTxBuilder,
   VaultContract,
-  VaultContractSlim,
-  VaultContractV1,
-  VaultContractV2,
 } from "../components/types";
 import { useChainId, useProvider } from "../Connectors/Metamask";
 import { saveTemplateAsFile } from "../utils/files";
@@ -110,7 +107,7 @@ enum VaultAdminSetMethod {
 }
 
 const Field: React.FC<{
-  vaultContract: VaultContractV1 | VaultContractSlim | VaultContractV2;
+  vaultContract: VaultContract;
   label: string;
   vaultMethod: VaultAdminSetMethod;
   decimals: number;
@@ -474,7 +471,7 @@ export default function VaultAdminPanel() {
 
       void fetchVaultValues();
     }
-  }, [collateral, metamaskProvider]);
+  }, [collateral, metamaskProvider, vaultAdminContextState.includeInTx]);
 
   useEffect(() => {
     const fetchIPFSContent = async () => {

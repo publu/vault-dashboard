@@ -64,9 +64,17 @@ const fetchVaults = (
     ];
     const vaultInfoPromises = chainIds
       .flatMap((chainId) => {
-        const qiDaoContracts = COLLATERALS[chainId]?.filter(
-          (c) => !c.disabled && c.shortName !== "matic"
-        );
+        const qiDaoContracts: (
+          | COLLATERAL
+          | COLLATERAL_V2
+          | GAUGE_VALID_COLLATERAL
+          | GAUGE_VALID_COLLATERAL_V2
+        )[] = [];
+        COLLATERALS[chainId]?.forEach((c) => {
+          if ("disabled" in c && !c.disabled && c.shortName !== "matic") {
+          }
+          qiDaoContracts.push(c);
+        });
 
         const contracts = [...(qiDaoContracts || [])];
 
