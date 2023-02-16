@@ -3,6 +3,7 @@ import {
   createHttpLink,
   gql,
   InMemoryCache,
+  useQuery,
 } from "@apollo/client";
 import { ChainId } from "@qidao/sdk";
 import { getUnixTime } from "date-fns/fp";
@@ -41,4 +42,30 @@ export const getBlockNumbersFromTS = async (
       chainId: chainId.toString(),
     },
   });
+};
+
+export const useBlockNumbersFromTS = (
+  timestamp: Date | number,
+  chainId: ChainId
+) => {
+  //"10", "25", "100", "137", "250", "1285", "42161", "43114", "1666600000"
+
+  const ts = timestamp instanceof Date ? getUnixTime(timestamp) : timestamp;
+  return useQuery(
+    gql`
+      query blockTimestamp($ts: Int!, $chainId: String!) {
+        blocks(where: { ts: $ts, network_in: [$chainId] }) {
+          network
+          number
+        }
+      }
+    `,
+    {
+      variables: {
+        ts,
+        chainId: chainId.toString(),
+      },
+      client: blockfinderClient,
+    }
+  );
 };

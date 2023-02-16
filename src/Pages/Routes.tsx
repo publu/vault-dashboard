@@ -28,6 +28,7 @@ import { ChainName } from "../constants";
 import { init } from "../multicall";
 import { theme } from "../theme";
 import { fetchVaultInfo } from "../vaultInfo";
+import EqiRewards from "./EqiRewards";
 import LiquidationHistory from "./LiquidationHistory";
 import SnapshotProposal from "./SnapshotProposal";
 import Timelock from "./Timelock";
@@ -234,6 +235,7 @@ const Routes: React.FC = () => {
             />
             <Route path="/zapper-admin" element={<ZapperAdmin />} />
             <Route path="/timelock" element={<Timelock />} />
+            <Route path="/eqi-rewards" element={<EqiRewards />} />
           </CustomRoutes>
         </Admin>
       </BrowserRouter>
