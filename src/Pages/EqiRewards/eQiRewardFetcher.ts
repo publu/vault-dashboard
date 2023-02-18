@@ -123,12 +123,12 @@ export function generateDisperse(
 
   const outputPath = `eqi-rewards-${SNAPSHOT_BLOCK}-${MINIMUM_END_BLOCK}.json`;
   const gnosisOutputPath = `eqi-rewards-${SNAPSHOT_BLOCK}-${MINIMUM_END_BLOCK}.csv`;
-  const gnosisOutputLines: string[] = [];
+  let gnosisOutputLines: string = ``;
 
   rewards.forEach((r) => {
     if (r.amount.gt(0)) {
       formattedRewards["values"][r.account] = formatUnits(r.amount.toString());
-      gnosisOutputLines.push(
+      gnosisOutputLines += (
         `erc20,0x580A84C73811E1839F75d86d75d88cCa0c241fF4,${
           r.account
         },${formatUnits(r.amount.toString())}`
