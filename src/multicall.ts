@@ -23,9 +23,14 @@ async function setupAndInitMulticall(chainId: ChainId) {
 }
 
 export async function init() {
+  const EXCLUDE_LIST = [5];
+
   return Promise.all(
     Object.keys(RPCS)
       .map((i) => parseInt(i))
+      .filter((i) => {
+        return !EXCLUDE_LIST.includes(i);
+      })
       .map(async (cId) => {
         return await setupAndInitMulticall(cId as ChainId);
       })

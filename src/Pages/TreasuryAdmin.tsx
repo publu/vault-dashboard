@@ -18,7 +18,7 @@ import {
 } from "@qidao/sdk";
 import { Contract } from "ethcall";
 import { ethers } from "ethers";
-import _ from "lodash";
+import _, { isEmpty } from "lodash";
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Datagrid,
@@ -33,7 +33,11 @@ import {
 import { TxForTxBuilder } from "../components/types";
 import { useProvider } from "../Connectors/Metamask";
 import { ChainName } from "../constants";
-import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
+import {
+  BeefyZapper__factory,
+  CamZapper__factory,
+  Erc20QiStablecoin__factory,
+} from "../contracts";
 import { init, multicall } from "../multicall";
 import { shortenHex } from "../utils/addresses";
 import { saveTemplateAsJsonFile } from "../utils/files";
@@ -137,7 +141,7 @@ const ChainSelector: React.FC<{
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={selectedChainId}
-        label="Age"
+        label="ChainId"
         onChange={(e) => {
           let cId: ChainId;
           if (typeof e.target.value === "string")
@@ -222,11 +226,18 @@ const fetchVaultZeroes = async (
   );
 
   const vaultOwnerCalls = collaterals.map((c) => {
-    const vaultAddress =
-      c.vaultAddress !== OG_MATIC_VAULT
-        ? c.vaultAddress
-        : "0x6AF1d9376a7060488558cfB443939eD67Bb9b48d";
-    const vaultContract = new Contract(vaultAddress, c.contractAbi as any);
+    let vaultContract: Contract;
+    let vaultAddress: string;
+    if (c.vaultAddress !== OG_MATIC_VAULT) {
+      vaultAddress = c.vaultAddress;
+      vaultContract = new Contract(vaultAddress, c.contractAbi as any);
+    } else {
+      vaultAddress = "0x6AF1d9376a7060488558cfB443939eD67Bb9b48d";
+      vaultContract = new Contract(
+        vaultAddress,
+        Erc20QiStablecoin__factory.abi as any
+      );
+    }
     return vaultContract.ownerOf(VAULT_IDX);
   });
   const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls);
@@ -275,7 +286,9 @@ const TreasuryAdmin = () => {
       const vaultZeros = await Promise.all(
         Object.keys(COLLATERALS).map((cId) => {
           const chainId = parseInt(cId) as ChainId;
-          return fetchVaultZeroes(chainId, COLLATERALS[chainId] || []);
+          if (!isEmpty(COLLATERALS[chainId]))
+            return fetchVaultZeroes(chainId, COLLATERALS[chainId]);
+          else return [];
         })
       );
       setVaults(vaultZeros.flat());
@@ -447,7 +460,7 @@ const TreasuryAdmin = () => {
   return (
     <div>
       <>
-        <button onClick={() => a()}>Click me to sign</button>
+        <button onClick={() => a()}>Generate and download TX</button>
         <ChainSelector
           selectedChainId={selectedChainId}
           setSelectedChainId={setSelectedChainId}
