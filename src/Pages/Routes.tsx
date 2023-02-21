@@ -97,7 +97,7 @@ const fetchVaults = (
                 addedVaults.has(
                   JSON.stringify(v, [
                     "vaultIdx",
-                    "collateral",
+                    "depositedCollateralAmount",
                     "debt",
                     "owner",
                     "tokenName",
@@ -110,7 +110,7 @@ const fetchVaults = (
                 addedVaults.add(
                   JSON.stringify(v, [
                     "vaultIdx",
-                    "collateral",
+                    "depositedCollateralAmount",
                     "debt",
                     "owner",
                     "tokenName",

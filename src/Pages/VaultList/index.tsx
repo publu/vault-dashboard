@@ -30,12 +30,15 @@ const VaultList: React.FC = () => {
       queryOptions={{ refetchInterval: 1000 }}
       filters={searchFilters}
     >
-      <Datagrid>
+      <Datagrid optimized>
         <TextField source="vaultChainName" />
         <TextField source="tokenName" />
         <NumberField source="vaultIdx" />
         <TextField source="owner" />
-        <NumberField source="collateral" options={{ style: "decimal" }} />
+        <NumberField
+          source="depositedCollateralAmount"
+          options={{ style: "decimal" }}
+        />
         <NumberField
           source="debt"
           options={{ style: "currency", currency: "USD" }}
