@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useProvider } from "../../Connectors/Metamask";
 import { SimpleTimelock__factory } from "../../contracts";
-import { saveTemplateAsFile } from "../../utils/files";
+import { saveTemplateAsJsonFile } from "../../utils/files";
 import Field from "./Field";
 import { AbiFragment, AbiFunctionName, ITimelockQueueTxForm } from "./types";
 import VaultForm from "./VaultForm";
@@ -84,7 +84,7 @@ function QueueForm() {
         },
       },
     ];
-    saveTemplateAsFile("timelock.json", gnosisTx);
+    saveTemplateAsJsonFile("timelock.json", gnosisTx);
     // setIsWaitingOnTx(true);
     // await tx.wait(1);
     // setIsWaitingOnTx(false);
@@ -161,7 +161,7 @@ function ExecuteForm() {
         },
       },
     ];
-    saveTemplateAsFile("timelock.json", gnosisTx);
+    saveTemplateAsJsonFile("timelock.json", gnosisTx);
     // setIsWaitingOnTx(true);
     // await tx.wait(1);
     // setIsWaitingOnTx(false);

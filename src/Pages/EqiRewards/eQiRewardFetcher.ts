@@ -1,6 +1,9 @@
 import { BigNumber } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
-import { saveTemplateAsFile } from "../../utils/files";
+import {
+  saveTemplateAsCsvFile,
+  saveTemplateAsJsonFile,
+} from "../../utils/files";
 
 // const SUBGRAPH = "https://api.thegraph.com/subgraphs/name/publu/eqi-stuff";
 const SUBGRAPH =
@@ -123,19 +126,17 @@ export function generateDisperse(
 
   const outputPath = `eqi-rewards-${SNAPSHOT_BLOCK}-${MINIMUM_END_BLOCK}.json`;
   const gnosisOutputPath = `eqi-rewards-${SNAPSHOT_BLOCK}-${MINIMUM_END_BLOCK}.csv`;
-  let gnosisOutputLines: string = ``;
-
-  rewards.forEach((r) => {
+  const gnosisOutputLines = rewards.map((r) => {
     if (r.amount.gt(0)) {
       formattedRewards["values"][r.account] = formatUnits(r.amount.toString());
-      gnosisOutputLines += (
-        `erc20,0x580A84C73811E1839F75d86d75d88cCa0c241fF4,${
-          r.account
-        },${formatUnits(r.amount.toString())}`
-      );
+      return `erc20,0x580A84C73811E1839F75d86d75d88cCa0c241fF4,${
+        r.account
+      },${formatUnits(r.amount.toString())}`;
+    } else {
+      return null;
     }
   });
 
-  saveTemplateAsFile(outputPath, formattedRewards);
-  saveTemplateAsFile(gnosisOutputPath, gnosisOutputLines);
+  saveTemplateAsJsonFile(outputPath, formattedRewards);
+  saveTemplateAsCsvFile(gnosisOutputPath, gnosisOutputLines);
 }

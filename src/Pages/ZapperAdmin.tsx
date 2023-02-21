@@ -17,7 +17,7 @@ import {
   CamZapper,
   CamZapper__factory,
 } from "../contracts";
-import { saveTemplateAsFile } from "../utils/files";
+import { saveTemplateAsJsonFile } from "../utils/files";
 
 type Zapper = CamZapper | BeefyZapper;
 function isBeefyZapper(z: Zapper | undefined): z is BeefyZapper {
@@ -68,7 +68,7 @@ const BeefyZapperForm: React.FC<{ zapper: BeefyZapper }> = ({ zapper }) => {
         },
       },
     ];
-    saveTemplateAsFile(
+    saveTemplateAsJsonFile(
       `${zapper.address}-beefy-zapper-${data.shouldAdd}-tx.json`,
       GnosisTx
     );
@@ -175,7 +175,7 @@ const CamZapperForm: React.FC<{ zapper: CamZapper }> = ({ zapper }) => {
       },
     ];
 
-    saveTemplateAsFile(
+    saveTemplateAsJsonFile(
       `${zapper.address}-cam-zapper-${data.shouldAdd}-tx.json`,
       GnosisTx
     );

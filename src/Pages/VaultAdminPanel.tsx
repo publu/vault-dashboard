@@ -14,7 +14,7 @@ import {
   VaultContract,
 } from "../components/types";
 import { useChainId, useProvider } from "../Connectors/Metamask";
-import { saveTemplateAsFile } from "../utils/files";
+import { saveTemplateAsJsonFile } from "../utils/files";
 import { extractIPFSCID } from "../utils/urls";
 
 interface VaultAdminContextInterface {
@@ -355,7 +355,7 @@ const generateTx = async (
     })
   );
   const someTxs = txs.flatMap((x) => (x ? [x] : []));
-  saveTemplateAsFile(`${vaultContract.address}-admin-txes.json`, someTxs);
+  saveTemplateAsJsonFile(`${vaultContract.address}-admin-txes.json`, someTxs);
 };
 
 export default function VaultAdminPanel() {

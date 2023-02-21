@@ -36,7 +36,7 @@ import { ChainName } from "../constants";
 import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
 import { init, multicall } from "../multicall";
 import { shortenHex } from "../utils/addresses";
-import { saveTemplateAsFile } from "../utils/files";
+import { saveTemplateAsJsonFile } from "../utils/files";
 import { getId } from "../utils/utils";
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
@@ -438,7 +438,7 @@ const TreasuryAdmin = () => {
         (item): item is TxForTxBuilder => !!item
       );
       console.log({ vaultTxs });
-      saveTemplateAsFile(`${selectedChainId}-withdraw-txes.json`, vaultTxs);
+      saveTemplateAsJsonFile(`${selectedChainId}-withdraw-txes.json`, vaultTxs);
     }
   };
   const listContext = useList({
