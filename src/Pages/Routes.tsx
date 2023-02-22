@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Contract } from 'ethcall'
 import fakeDataProvider from 'ra-data-fakerest'
-import React, { useLayoutEffect } from 'react'
+import React from 'react'
 
 import { Admin, CustomRoutes, DataProvider, NotificationType, Resource, useNotify } from 'react-admin'
 import { BrowserRouter, Route } from 'react-router-dom'
@@ -14,6 +14,7 @@ import { ChainName } from '../constants'
 import { init } from '../multicall'
 import { theme } from '../theme'
 import { fetchVaultInfo } from '../vaultInfo'
+import AirDropDebugger from './AirDropDebugger'
 import EqiRewards from './EqiRewards'
 import LiquidationHistory from './LiquidationHistory'
 import SnapshotProposal from './SnapshotProposal'
@@ -151,7 +152,7 @@ const Routes: React.FC = () => {
         vaults: [],
     })
     const notify = useNotify()
-    useLayoutEffect(() => fetchVaults(dataProvider, notify), [dataProvider, notify])
+    // useLayoutEffect(() => fetchVaults(dataProvider, notify), [dataProvider, notify])
 
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
@@ -166,6 +167,7 @@ const Routes: React.FC = () => {
                         <Route path="/zapper-admin" element={<ZapperAdmin />} />
                         <Route path="/timelock" element={<Timelock />} />
                         <Route path="/eqi-rewards" element={<EqiRewards />} />
+                        <Route path="/airdrop-debugger" element={<AirDropDebugger />} />
                     </CustomRoutes>
                 </Admin>
             </BrowserRouter>

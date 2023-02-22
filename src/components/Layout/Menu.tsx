@@ -6,6 +6,7 @@ import FlashAutoIcon from '@mui/icons-material/FlashAuto'
 import HistoryIcon from '@mui/icons-material/History'
 import LockClockIcon from '@mui/icons-material/LockClock'
 import ParaglidingIcon from '@mui/icons-material/Paragliding'
+import TroubleshootIcon from '@mui/icons-material/Troubleshoot'
 import * as React from 'react'
 import * as RA from 'react-admin'
 
@@ -19,5 +20,6 @@ export const MyMenu = (props: JSX.IntrinsicAttributes & RA.MenuProps) => (
         <RA.Menu.Item to="/zapper-admin" primaryText="Zapper Admin" leftIcon={<FlashAutoIcon />} />
         <RA.Menu.Item to="/timelock" primaryText="Timelock" leftIcon={<LockClockIcon />} />
         <RA.Menu.Item to="/eqi-rewards" primaryText="eQi Rewards" leftIcon={<ParaglidingIcon />} />
+        <RA.Menu.Item to="/airdrop-debugger" primaryText="AirDrop Investigatooooor" leftIcon={<TroubleshootIcon />} />
     </RA.Menu>
 )
