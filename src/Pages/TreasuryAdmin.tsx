@@ -1,43 +1,43 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import * as MUI from "@mui/material";
-import { Button } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete'
+import * as MUI from '@mui/material'
+import { Button } from '@mui/material'
 import {
-  AVAX_ZAPPER_ADDRESS,
-  CAM_META,
-  CAMZAPPER_ADDRESS,
-  ChainId,
-  COLLATERAL,
-  COLLATERAL_V2,
-  COLLATERALS,
-  Erc20Stablecoin,
-  FTM_ZAPPER_ADDRESS,
-  GAUGE_VALID_COLLATERAL,
-  GAUGE_VALID_COLLATERAL_V2,
-  OG_MATIC_VAULT,
-  ZAP_META,
-} from "@qidao/sdk";
-import { Contract } from "ethcall";
-import { ethers } from "ethers";
-import _ from "lodash";
-import React, { Dispatch, useEffect, useState } from "react";
+    AVAX_ZAPPER_ADDRESS,
+    CAM_META,
+    CAMZAPPER_ADDRESS,
+    ChainId,
+    COLLATERAL,
+    COLLATERAL_V2,
+    COLLATERALS,
+    Erc20Stablecoin,
+    FTM_ZAPPER_ADDRESS,
+    GAUGE_VALID_COLLATERAL,
+    GAUGE_VALID_COLLATERAL_V2,
+    OG_MATIC_VAULT,
+    ZAP_META,
+} from '@qidao/sdk'
+import { Contract } from 'ethcall'
+import { ethers } from 'ethers'
+import _, { isEmpty } from 'lodash'
+import React, { Dispatch, useEffect, useState } from 'react'
 import {
-  Datagrid,
-  ListContextProvider,
-  TextField,
-  TextFieldProps,
-  useList,
-  useListContext,
-  useRecordContext,
-  useUnselect,
-} from "react-admin";
-import { TxForTxBuilder } from "../components/types";
-import { useProvider } from "../Connectors/Metamask";
-import { ChainName } from "../constants";
-import { BeefyZapper__factory, CamZapper__factory } from "../contracts";
-import { init, multicall } from "../multicall";
-import { shortenHex } from "../utils/addresses";
-import { saveTemplateAsFile } from "../utils/files";
-import { getId } from "../utils/utils";
+    Datagrid,
+    ListContextProvider,
+    TextField,
+    TextFieldProps,
+    useList,
+    useListContext,
+    useRecordContext,
+    useUnselect,
+} from 'react-admin'
+import { TxForTxBuilder } from '../components/types'
+import { useProvider } from '../Connectors/Metamask'
+import { ChainName } from '../constants'
+import { BeefyZapper__factory, CamZapper__factory, Erc20QiStablecoin__factory } from '../contracts'
+import { init, multicall } from '../multicall'
+import { shortenHex } from '../utils/addresses'
+import { saveTemplateAsJsonFile } from '../utils/files'
+import { getId } from '../utils/utils'
 
 // const safeAddress = "0x3182E6856c3B59C39114416075770Ec9DC9Ff436"; //ETH Address
 // const transactionServiceUrl = "https://safe-transaction.gnosis.io/"; // on rinkeby testnet
@@ -73,408 +73,332 @@ import { getId } from "../utils/utils";
 // };
 
 const EditiableRow = (
-  props: TextFieldProps & {
-    vaults: TreasuryManagementVaultData[];
-    setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>;
-    source: string;
-  }
+    props: TextFieldProps & {
+        vaults: TreasuryManagementVaultData[]
+        setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>
+        source: string
+    }
 ) => {
-  const [editMode, setEditMode] = useState(false);
-  const foo: TreasuryManagementVaultData = useRecordContext(props);
-  const [collateralValue, setCollateralValue] = useState(
-    foo.depositedCollateralAmount
-  );
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newInt = parseFloat(event.target.value);
-    const updatedVault = {
-      ...foo,
-      depositedCollateralAmount: newInt ? newInt : 0,
-    };
-    const updatedVaults = props.vaults.map((v) =>
-      v.id !== updatedVault.id ? v : updatedVault
-    );
-    console.log({ updatedVaults });
-    props.setVaults(updatedVaults);
-    setCollateralValue(newInt ? newInt : 0);
-  };
-  return (
-    <>
-      {editMode ? (
-        <MUI.TextField
-          value={collateralValue}
-          size="small"
-          onChange={handleChange}
-          onBlur={() => setEditMode(!editMode)}
-        />
-      ) : (
-        <TextField
-          onClick={() => setEditMode(!editMode)}
-          source={props.source}
-        />
-      )}
-    </>
-  );
-};
+    const [editMode, setEditMode] = useState(false)
+    const foo: TreasuryManagementVaultData = useRecordContext(props)
+    const [collateralValue, setCollateralValue] = useState(foo.depositedCollateralAmount)
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newInt = parseFloat(event.target.value)
+        const updatedVault = {
+            ...foo,
+            depositedCollateralAmount: newInt ? newInt : 0,
+        }
+        const updatedVaults = props.vaults.map((v) => (v.id !== updatedVault.id ? v : updatedVault))
+        console.log({ updatedVaults })
+        props.setVaults(updatedVaults)
+        setCollateralValue(newInt ? newInt : 0)
+    }
+    return (
+        <>
+            {editMode ? (
+                <MUI.TextField value={collateralValue} size="small" onChange={handleChange} onBlur={() => setEditMode(!editMode)} />
+            ) : (
+                <TextField onClick={() => setEditMode(!editMode)} source={props.source} />
+            )}
+        </>
+    )
+}
 
 const AddressField = (
-  props: TextFieldProps & {
-    source: string;
-  }
+    props: TextFieldProps & {
+        source: string
+    }
 ) => {
-  const record = useRecordContext(props);
-  console.log(record);
-  return <span>{shortenHex(record.owner)}</span>;
-};
+    const record = useRecordContext(props)
+    console.log(record)
+    return <span>{shortenHex(record.owner)}</span>
+}
 
 const ChainSelector: React.FC<{
-  selectedChainId: ChainId;
-  setSelectedChainId: Function;
+    selectedChainId: ChainId
+    setSelectedChainId: Function
 }> = ({ selectedChainId, setSelectedChainId }) => {
-  return (
-    <MUI.FormControl>
-      <MUI.InputLabel id="demo-simple-select-label">Chain</MUI.InputLabel>
-      <MUI.Select
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
-        value={selectedChainId}
-        label="Age"
-        onChange={(e) => {
-          let cId: ChainId;
-          if (typeof e.target.value === "string")
-            cId = parseInt(e.target.value) as ChainId;
-          else cId = e.target.value as ChainId;
-          setSelectedChainId(cId);
-        }}
-      >
-        {Object.keys(COLLATERALS)
-          .map((cId) => {
-            return parseInt(cId) as ChainId;
-          })
-          .filter((chainId) => !isNaN(chainId))
-          .map((chainId) => {
-            return (
-              <MUI.MenuItem key={chainId} value={chainId}>
-                {ChainName[chainId]}
-              </MUI.MenuItem>
-            );
-          })}
-      </MUI.Select>
-    </MUI.FormControl>
-  );
-};
+    return (
+        <MUI.FormControl>
+            <MUI.InputLabel id="demo-simple-select-label">Chain</MUI.InputLabel>
+            <MUI.Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={selectedChainId}
+                label="ChainId"
+                onChange={(e) => {
+                    let cId: ChainId
+                    if (typeof e.target.value === 'string') cId = parseInt(e.target.value) as ChainId
+                    else cId = e.target.value as ChainId
+                    setSelectedChainId(cId)
+                }}
+            >
+                {Object.keys(COLLATERALS)
+                    .map((cId) => {
+                        return parseInt(cId) as ChainId
+                    })
+                    .filter((chainId) => !isNaN(chainId))
+                    .map((chainId) => {
+                        return (
+                            <MUI.MenuItem key={chainId} value={chainId}>
+                                {ChainName[chainId]}
+                            </MUI.MenuItem>
+                        )
+                    })}
+            </MUI.Select>
+        </MUI.FormControl>
+    )
+}
 
 const PostBulkActionButtons = (props: {
-  vaults: TreasuryManagementVaultData[];
-  setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>;
+    vaults: TreasuryManagementVaultData[]
+    setVaults: Dispatch<React.SetStateAction<TreasuryManagementVaultData[]>>
 }) => {
-  const { selectedIds, resource } = useListContext();
-  const unselect = useUnselect(resource);
+    const { selectedIds, resource } = useListContext()
+    const unselect = useUnselect(resource)
 
-  console.log({ selectedIds });
-  const deleteVaults = () => {
-    const trimmedVaults = props.vaults.filter((v) => {
-      return !selectedIds.includes(v.id);
-    });
-    props.setVaults(trimmedVaults);
-    unselect(selectedIds);
-  };
+    console.log({ selectedIds })
+    const deleteVaults = () => {
+        const trimmedVaults = props.vaults.filter((v) => {
+            return !selectedIds.includes(v.id)
+        })
+        props.setVaults(trimmedVaults)
+        unselect(selectedIds)
+    }
 
-  return (
-    <React.Fragment>
-      <Button onClick={() => deleteVaults()}>
-        <DeleteIcon />
-        Delete
-      </Button>
-    </React.Fragment>
-  );
-};
+    return (
+        <React.Fragment>
+            <Button onClick={() => deleteVaults()}>
+                <DeleteIcon />
+                Delete
+            </Button>
+        </React.Fragment>
+    )
+}
 
-type TreasuryManagementVaultData = (
-  | COLLATERAL
-  | COLLATERAL_V2
-  | GAUGE_VALID_COLLATERAL
-  | GAUGE_VALID_COLLATERAL_V2
-) & {
-  depositedCollateralAmount: number;
-  id: string | number;
-  vaultIdx: number;
-};
+type TreasuryManagementVaultData = (COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2) & {
+    depositedCollateralAmount: number
+    id: string | number
+    vaultIdx: number
+}
 
 const fetchVaultZeroes = async (
-  chainId: ChainId,
-  collaterals: (
-    | COLLATERAL
-    | COLLATERAL_V2
-    | GAUGE_VALID_COLLATERAL
-    | GAUGE_VALID_COLLATERAL_V2
-  )[]
+    chainId: ChainId,
+    collaterals: (COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2)[]
 ) => {
-  await init();
-  const VAULT_IDX = 0;
-  //TODO make the ordering link between collaterals and calls more explict
-  const depositedCollateralCalls = collaterals.map((c) => {
-    const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any);
-    return vaultContract.vaultCollateral(VAULT_IDX);
-  });
-  const depositedCollaterals = await multicall(
-    chainId,
-    depositedCollateralCalls
-  );
+    await init()
+    const VAULT_IDX = 0
+    //TODO make the ordering link between collaterals and calls more explict
+    const depositedCollateralCalls = collaterals.map((c) => {
+        const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any)
+        return vaultContract.vaultCollateral(VAULT_IDX)
+    })
+    const depositedCollaterals = await multicall(chainId, depositedCollateralCalls)
 
-  const vaultOwnerCalls = collaterals.map((c) => {
-    const vaultAddress =
-      c.vaultAddress !== OG_MATIC_VAULT
-        ? c.vaultAddress
-        : "0x6AF1d9376a7060488558cfB443939eD67Bb9b48d";
-    const vaultContract = new Contract(vaultAddress, c.contractAbi as any);
-    return vaultContract.ownerOf(VAULT_IDX);
-  });
-  const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls);
-  return collaterals.map((c, i) => {
-    const depositedCollateralAmount =
-      (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals;
-    const owner = vaultOwners[i];
-    return {
-      ...c,
-      owner,
-      depositedCollateralAmount,
-      id: getId(c, VAULT_IDX),
-      vaultIdx: VAULT_IDX,
-    };
-  });
-};
+    const vaultOwnerCalls = collaterals.map((c) => {
+        let vaultContract: Contract
+        let vaultAddress: string
+        if (c.vaultAddress !== OG_MATIC_VAULT) {
+            vaultAddress = c.vaultAddress
+            vaultContract = new Contract(vaultAddress, c.contractAbi as any)
+        } else {
+            vaultAddress = '0x6AF1d9376a7060488558cfB443939eD67Bb9b48d'
+            vaultContract = new Contract(vaultAddress, Erc20QiStablecoin__factory.abi as any)
+        }
+        return vaultContract.ownerOf(VAULT_IDX)
+    })
+    const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls)
+    return collaterals.map((c, i) => {
+        const depositedCollateralAmount = (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals
+        const owner = vaultOwners[i]
+        return {
+            ...c,
+            owner,
+            depositedCollateralAmount,
+            id: getId(c, VAULT_IDX),
+            vaultIdx: VAULT_IDX,
+        }
+    })
+}
 
 const isBeefyZappable = (vaultAddress: string) => {
-  const zapVaultKeys = Object.values(ZAP_META).flat();
-  const zapZappableVaultsAddresses = zapVaultKeys.map(Object.keys).flat();
+    const zapVaultKeys = Object.values(ZAP_META).flat()
+    const zapZappableVaultsAddresses = zapVaultKeys.map(Object.keys).flat()
 
-  return zapZappableVaultsAddresses.includes(vaultAddress);
-};
+    return zapZappableVaultsAddresses.includes(vaultAddress)
+}
 
 const isCamZappable = (vaultAddress: string) => {
-  const camVaultKeys = Object.values(CAM_META).flat();
-  const camZappableVaultsAddresses = camVaultKeys.map(Object.keys).flat();
+    const camVaultKeys = Object.values(CAM_META).flat()
+    const camZappableVaultsAddresses = camVaultKeys.map(Object.keys).flat()
 
-  return camZappableVaultsAddresses.includes(vaultAddress);
-};
+    return camZappableVaultsAddresses.includes(vaultAddress)
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isZappable = (vaultAddress: string) => {
-  return isBeefyZappable(vaultAddress) || isCamZappable(vaultAddress);
-};
+    return isBeefyZappable(vaultAddress) || isCamZappable(vaultAddress)
+}
 
 const TreasuryAdmin = () => {
-  const [selectedChainId, setSelectedChainId] = useState(ChainId.MATIC);
+    const [selectedChainId, setSelectedChainId] = useState(ChainId.MATIC)
 
-  // const [safeSdk, setSafeSdk] = useState<Safe>();
-  // const [safeService, setSafeService] = useState<SafeServiceClient>();
-  let metamaskProvider = useProvider();
-  const [vaults, setVaults] = useState<TreasuryManagementVaultData[]>([]);
-  useEffect(() => {
-    const fetchAllChainsVaultZeros = async () => {
-      const vaultZeros = await Promise.all(
-        Object.keys(COLLATERALS).map((cId) => {
-          const chainId = parseInt(cId) as ChainId;
-          return fetchVaultZeroes(chainId, COLLATERALS[chainId] || []);
-        })
-      );
-      setVaults(vaultZeros.flat());
-    };
-    void fetchAllChainsVaultZeros();
-  }, []);
-
-  async function generateVaultTx(
-    vault: TreasuryManagementVaultData
-  ): Promise<TxForTxBuilder[]> {
-    if (vault && metamaskProvider) {
-      try {
-        const vaultContract = vault.connect(
-          vault.vaultAddress,
-          metamaskProvider
-        );
-        if (isCamZappable(vault.vaultAddress)) {
-          const camZapperAddress = CAMZAPPER_ADDRESS[ChainId.MATIC];
-          if (camZapperAddress) {
-            const camZapperContract = CamZapper__factory.connect(
-              camZapperAddress,
-              metamaskProvider
-            );
-            const camMeta = CAM_META[vault.chainId]?.[vault.vaultAddress];
-            if (camMeta) {
-              const approveTx = await vaultContract.populateTransaction.approve(
-                camZapperAddress,
-                vault.vaultIdx
-              );
-              const zapTx =
-                await camZapperContract.populateTransaction.camZapFromVault(
-                  ethers.utils.parseUnits(
-                    vault.depositedCollateralAmount.toString(),
-                    vault.token.decimals
-                  ),
-                  vault.vaultIdx,
-                  camMeta.underlying.address,
-                  camMeta.amTokenAddress,
-                  camMeta.camTokenAddress,
-                  vault.vaultAddress
-                );
-              return [
-                {
-                  description: `Approve ${vault.token.name} w/ Zapper`,
-                  raw: {
-                    to: vault.vaultAddress,
-                    value: "0",
-                    data: approveTx.data || "",
-                  },
-                },
-                {
-                  description: `${vault.token.name} zap from ${
-                    ChainName[vault.chainId]
-                  }`,
-                  raw: {
-                    to: camZapperAddress,
-                    value: "0",
-                    data: zapTx.data || "",
-                  },
-                },
-              ];
-            }
-          }
-        } else if (isBeefyZappable(vault.vaultAddress)) {
-          let beefyZapperAddress: string | undefined;
-          switch (vault.chainId) {
-            case ChainId.AVALANCHE:
-              beefyZapperAddress = AVAX_ZAPPER_ADDRESS;
-              break;
-            case ChainId.FANTOM:
-              beefyZapperAddress = FTM_ZAPPER_ADDRESS;
-              break;
-          }
-          if (beefyZapperAddress) {
-            const beefyZapperContract = BeefyZapper__factory.connect(
-              beefyZapperAddress,
-              metamaskProvider
-            );
-            const zapMeta = ZAP_META[vault.chainId]?.[vault.vaultAddress];
-            if (zapMeta) {
-              const approveTx = await vaultContract.populateTransaction.approve(
-                beefyZapperAddress,
-                vault.vaultIdx
-              );
-              const zapTx =
-                await beefyZapperContract.populateTransaction.beefyZapFromVault(
-                  ethers.utils.parseUnits(
-                    vault.depositedCollateralAmount.toString(),
-                    vault.token.decimals
-                  ),
-                  vault.vaultIdx,
-                  zapMeta.underlying.address,
-                  zapMeta.mooAssetAddress,
-                  vault.vaultAddress
-                );
-              return [
-                {
-                  description: `Approve ${vault.token.name} w/ Zapper`,
-                  raw: {
-                    to: vault.vaultAddress,
-                    value: "0",
-                    data: approveTx.data || "",
-                  },
-                },
-                {
-                  description: `${vault.token.name} zap from ${
-                    ChainName[vault.chainId]
-                  }`,
-                  raw: {
-                    to: beefyZapperAddress,
-                    value: "0",
-                    data: zapTx.data || "",
-                  },
-                },
-              ];
-            }
-          }
-        } else {
-          const foo = await (
-            vaultContract as Erc20Stablecoin
-          ).populateTransaction.withdrawCollateral(
-            vault.vaultIdx,
-            ethers.utils.parseUnits(
-              vault.depositedCollateralAmount.toString(),
-              vault.token.decimals
+    // const [safeSdk, setSafeSdk] = useState<Safe>();
+    // const [safeService, setSafeService] = useState<SafeServiceClient>();
+    let metamaskProvider = useProvider()
+    const [vaults, setVaults] = useState<TreasuryManagementVaultData[]>([])
+    useEffect(() => {
+        const fetchAllChainsVaultZeros = async () => {
+            const vaultZeros = await Promise.all(
+                Object.keys(COLLATERALS).map((cId) => {
+                    const chainId = parseInt(cId) as ChainId
+                    if (!isEmpty(COLLATERALS[chainId])) return fetchVaultZeroes(chainId, COLLATERALS[chainId])
+                    else return []
+                })
             )
-          );
-          return [
-            {
-              description: `${vault.token.name} withdrawl from ${
-                ChainName[vault.chainId]
-              }`,
-              raw: {
-                to: vault.vaultAddress,
-                value: "0",
-                data: foo.data || "",
-              },
-            },
-          ];
+            setVaults(vaultZeros.flat())
         }
-      } catch (e) {
-        console.warn({ e });
-        return [];
-      }
-    }
-    return [];
-  }
+        void fetchAllChainsVaultZeros()
+    }, [])
 
-  const a = async () => {
-    const vaultWithdrawTxs: TxForTxBuilder[] = (
-      await Promise.all(
-        vaults
-          ?.filter((v) => v.chainId === selectedChainId)
-          ?.map(async (vault) => (await generateVaultTx(vault))?.flat())
-      )
-    ).flat();
-
-    if (!_.isEmpty(vaultWithdrawTxs)) {
-      const vaultTxs = vaultWithdrawTxs.filter(
-        (item): item is TxForTxBuilder => !!item
-      );
-      console.log({ vaultTxs });
-      saveTemplateAsFile(`${selectedChainId}-withdraw-txes.json`, vaultTxs);
-    }
-  };
-  const listContext = useList({
-    data: vaults?.filter((v) => v.chainId === selectedChainId) || [],
-  });
-  return (
-    <div>
-      <>
-        <button onClick={() => a()}>Click me to sign</button>
-        <ChainSelector
-          selectedChainId={selectedChainId}
-          setSelectedChainId={setSelectedChainId}
-        />
-        <ListContextProvider value={listContext}>
-          <Datagrid
-            bulkActionButtons={
-              <PostBulkActionButtons
-                vaults={vaults || []}
-                setVaults={setVaults}
-              />
+    async function generateVaultTx(vault: TreasuryManagementVaultData): Promise<TxForTxBuilder[]> {
+        if (vault && metamaskProvider) {
+            try {
+                const vaultContract = vault.connect(vault.vaultAddress, metamaskProvider)
+                if (isCamZappable(vault.vaultAddress)) {
+                    const camZapperAddress = CAMZAPPER_ADDRESS[ChainId.MATIC]
+                    if (camZapperAddress) {
+                        const camZapperContract = CamZapper__factory.connect(camZapperAddress, metamaskProvider)
+                        const camMeta = CAM_META[vault.chainId]?.[vault.vaultAddress]
+                        if (camMeta) {
+                            const approveTx = await vaultContract.populateTransaction.approve(camZapperAddress, vault.vaultIdx)
+                            const zapTx = await camZapperContract.populateTransaction.camZapFromVault(
+                                ethers.utils.parseUnits(vault.depositedCollateralAmount.toString(), vault.token.decimals),
+                                vault.vaultIdx,
+                                camMeta.underlying.address,
+                                camMeta.amTokenAddress,
+                                camMeta.camTokenAddress,
+                                vault.vaultAddress
+                            )
+                            return [
+                                {
+                                    description: `Approve ${vault.token.name} w/ Zapper`,
+                                    raw: {
+                                        to: vault.vaultAddress,
+                                        value: '0',
+                                        data: approveTx.data || '',
+                                    },
+                                },
+                                {
+                                    description: `${vault.token.name} zap from ${ChainName[vault.chainId]}`,
+                                    raw: {
+                                        to: camZapperAddress,
+                                        value: '0',
+                                        data: zapTx.data || '',
+                                    },
+                                },
+                            ]
+                        }
+                    }
+                } else if (isBeefyZappable(vault.vaultAddress)) {
+                    let beefyZapperAddress: string | undefined
+                    switch (vault.chainId) {
+                        case ChainId.AVALANCHE:
+                            beefyZapperAddress = AVAX_ZAPPER_ADDRESS
+                            break
+                        case ChainId.FANTOM:
+                            beefyZapperAddress = FTM_ZAPPER_ADDRESS
+                            break
+                    }
+                    if (beefyZapperAddress) {
+                        const beefyZapperContract = BeefyZapper__factory.connect(beefyZapperAddress, metamaskProvider)
+                        const zapMeta = ZAP_META[vault.chainId]?.[vault.vaultAddress]
+                        if (zapMeta) {
+                            const approveTx = await vaultContract.populateTransaction.approve(beefyZapperAddress, vault.vaultIdx)
+                            const zapTx = await beefyZapperContract.populateTransaction.beefyZapFromVault(
+                                ethers.utils.parseUnits(vault.depositedCollateralAmount.toString(), vault.token.decimals),
+                                vault.vaultIdx,
+                                zapMeta.underlying.address,
+                                zapMeta.mooAssetAddress,
+                                vault.vaultAddress
+                            )
+                            return [
+                                {
+                                    description: `Approve ${vault.token.name} w/ Zapper`,
+                                    raw: {
+                                        to: vault.vaultAddress,
+                                        value: '0',
+                                        data: approveTx.data || '',
+                                    },
+                                },
+                                {
+                                    description: `${vault.token.name} zap from ${ChainName[vault.chainId]}`,
+                                    raw: {
+                                        to: beefyZapperAddress,
+                                        value: '0',
+                                        data: zapTx.data || '',
+                                    },
+                                },
+                            ]
+                        }
+                    }
+                } else {
+                    const foo = await (vaultContract as Erc20Stablecoin).populateTransaction.withdrawCollateral(
+                        vault.vaultIdx,
+                        ethers.utils.parseUnits(vault.depositedCollateralAmount.toString(), vault.token.decimals)
+                    )
+                    return [
+                        {
+                            description: `${vault.token.name} withdrawl from ${ChainName[vault.chainId]}`,
+                            raw: {
+                                to: vault.vaultAddress,
+                                value: '0',
+                                data: foo.data || '',
+                            },
+                        },
+                    ]
+                }
+            } catch (e) {
+                console.warn({ e })
+                return []
             }
-          >
-            <TextField source="vaultIdx" />
-            <TextField source="id" />
-            <EditiableRow
-              source="depositedCollateralAmount"
-              vaults={vaults || []}
-              setVaults={setVaults}
-            />
-            <TextField source="token.name" />
-            <AddressField source="owner" />
-          </Datagrid>
-        </ListContextProvider>
-      </>
-    </div>
-  );
-};
+        }
+        return []
+    }
 
-export default TreasuryAdmin;
+    const a = async () => {
+        const vaultWithdrawTxs: TxForTxBuilder[] = (
+            await Promise.all(
+                vaults?.filter((v) => v.chainId === selectedChainId)?.map(async (vault) => (await generateVaultTx(vault))?.flat())
+            )
+        ).flat()
+
+        if (!_.isEmpty(vaultWithdrawTxs)) {
+            const vaultTxs = vaultWithdrawTxs.filter((item): item is TxForTxBuilder => !!item)
+            console.log({ vaultTxs })
+            saveTemplateAsJsonFile(`${selectedChainId}-withdraw-txes.json`, vaultTxs)
+        }
+    }
+    const listContext = useList({
+        data: vaults?.filter((v) => v.chainId === selectedChainId) || [],
+    })
+    return (
+        <div>
+            <>
+                <button onClick={() => a()}>Generate and download TX</button>
+                <ChainSelector selectedChainId={selectedChainId} setSelectedChainId={setSelectedChainId} />
+                <ListContextProvider value={listContext}>
+                    <Datagrid bulkActionButtons={<PostBulkActionButtons vaults={vaults || []} setVaults={setVaults} />}>
+                        <TextField source="vaultIdx" />
+                        <TextField source="id" />
+                        <EditiableRow source="depositedCollateralAmount" vaults={vaults || []} setVaults={setVaults} />
+                        <TextField source="token.name" />
+                        <AddressField source="owner" />
+                    </Datagrid>
+                </ListContextProvider>
+            </>
+        </div>
+    )
+}
+
+export default TreasuryAdmin
