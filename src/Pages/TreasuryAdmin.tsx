@@ -23,6 +23,7 @@ import React, { Dispatch, useEffect, useState } from 'react'
 import {
     Datagrid,
     ListContextProvider,
+    NumberField,
     TextField,
     TextFieldProps,
     useList,
@@ -34,7 +35,7 @@ import { TxForTxBuilder } from '../components/types'
 import { useProvider } from '../Connectors/Metamask'
 import { ChainName } from '../constants'
 import { BeefyZapper__factory, CamZapper__factory, Erc20QiStablecoin__factory } from '../contracts'
-import { init, multicall } from '../multicall'
+import { init, multicall, multicall3 } from '../multicall'
 import { shortenHex } from '../utils/addresses'
 import { saveTemplateAsJsonFile } from '../utils/files'
 import { getId } from '../utils/utils'
@@ -193,7 +194,15 @@ const fetchVaultZeroes = async (
         const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any)
         return vaultContract.vaultCollateral(VAULT_IDX)
     })
-    const depositedCollaterals = await multicall(chainId, depositedCollateralCalls)
+    const collateralValueCalls = collaterals.map((c) => {
+        const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any)
+        return vaultContract.getEthPriceSource()
+    })
+
+    const allTheMulticalled = await multicall3(chainId, [...depositedCollateralCalls, ...collateralValueCalls])
+
+    const depositedCollaterals = allTheMulticalled.slice(0, collaterals.length)
+    const collateralValues = allTheMulticalled.slice(collaterals.length, collaterals.length * 2)
 
     const vaultOwnerCalls = collaterals.map((c) => {
         let vaultContract: Contract
@@ -210,11 +219,13 @@ const fetchVaultZeroes = async (
     const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls)
     return collaterals.map((c, i) => {
         const depositedCollateralAmount = (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals
+        const collateralValue = (collateralValues[i] as unknown as number) / 10 ** 8
         const owner = vaultOwners[i]
         return {
             ...c,
             owner,
             depositedCollateralAmount,
+            collateralValue: collateralValue * depositedCollateralAmount,
             id: getId(c, VAULT_IDX),
             vaultIdx: VAULT_IDX,
         }
@@ -392,6 +403,8 @@ const TreasuryAdmin = () => {
                         <TextField source="vaultIdx" />
                         <TextField source="id" />
                         <EditiableRow source="depositedCollateralAmount" vaults={vaults || []} setVaults={setVaults} />
+                        <NumberField source="collateralValue" />
+
                         <TextField source="token.name" />
                         <AddressField source="owner" />
                     </Datagrid>
