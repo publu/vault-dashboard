@@ -385,7 +385,7 @@ export default function VaultAdminPanel() {
 
             void fetchVaultValues()
         }
-    }, [collateral, metamaskProvider, vaultAdminContextState.includeInTx])
+    }, [collateral, metamaskProvider])
 
     useEffect(() => {
         const fetchIPFSContent = async () => {
