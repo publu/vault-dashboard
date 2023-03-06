@@ -68,3 +68,23 @@ export async function multicall2<T>(chainId: ChainId, calls: any[]) {
         throw new Error(`No call provider for chain: ${chainId}, did you call init?`)
     }
 }
+export async function multicall3<T>(chainId: ChainId, calls: any[]) {
+    const callProvider = ethcallProvider[chainId]
+    const queue = ethcall2Queue[chainId]
+    if (callProvider) {
+        return (
+            await Promise.all(
+                _.chunk(calls, 450).map((cs) => {
+                    return queue?.add(() =>
+                        callProvider.tryEach<T>(
+                            cs,
+                            cs.map(() => true)
+                        )
+                    )
+                })
+            )
+        ).flat()
+    } else {
+        throw new Error(`No call provider for chain: ${chainId}, did you call init?`)
+    }
+}
