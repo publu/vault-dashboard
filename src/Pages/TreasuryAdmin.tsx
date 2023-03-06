@@ -225,7 +225,7 @@ const fetchVaultZeroes = async (
             ...c,
             owner,
             depositedCollateralAmount,
-            collateralValue: collateralValue * depositedCollateralAmount,
+            collateralValue: collateralValue,
             id: getId(c, VAULT_IDX),
             vaultIdx: VAULT_IDX,
         }
