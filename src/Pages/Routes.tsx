@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Contract } from 'ethcall'
 import fakeDataProvider from 'ra-data-fakerest'
-import React from 'react'
+import React, { useLayoutEffect } from 'react'
 
 import { Admin, CustomRoutes, DataProvider, NotificationType, Resource, useNotify } from 'react-admin'
 import { BrowserRouter, Route } from 'react-router-dom'
@@ -152,7 +152,7 @@ const Routes: React.FC = () => {
         vaults: [],
     })
     const notify = useNotify()
-    // useLayoutEffect(() => fetchVaults(dataProvider, notify), [dataProvider, notify])
+    useLayoutEffect(() => fetchVaults(dataProvider, notify), [dataProvider, notify])
 
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
