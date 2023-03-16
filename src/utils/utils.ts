@@ -171,5 +171,5 @@ export async function addOrSwapChain(activeLibrary: Web3Provider, account: strin
 }
 
 export function getId(collateral: COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2, vaultIdx: number) {
-    return `${collateral.chainId}-${collateral.token.symbol}-${vaultIdx}`
+    return `${collateral.chainId}-${collateral.frontend}-${collateral.token.symbol}-${vaultIdx}`
 }
