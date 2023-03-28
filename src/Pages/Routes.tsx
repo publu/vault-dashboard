@@ -6,13 +6,13 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Contract } from 'ethcall'
 import fakeDataProvider from 'ra-data-fakerest'
 import React, { useLayoutEffect } from 'react'
-
 import { Admin, CustomRoutes, DataProvider, NotificationType, Resource, useNotify } from 'react-admin'
 import { BrowserRouter, Route } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { ChainName } from '../constants'
 import { init } from '../multicall'
 import { theme } from '../theme'
+import useQueryParams from '../utils/useQueryParams'
 import { fetchVaultInfo } from '../vaultInfo'
 import AirDropDebugger from './AirDropDebugger'
 import EqiRewards from './EqiRewards'
@@ -28,25 +28,28 @@ let addedVaults = new Set()
 
 const fetchVaults = (
     dataProvider: DataProvider,
-    notify: (message: string, options?: NotificationOptions & { type?: NotificationType }) => void
+    notify: (message: string, options?: NotificationOptions & { type?: NotificationType }) => void,
+    chainId: ChainId | null
 ) => {
     const effect = async () => {
         await init()
 
-        const chainIds = [
-            ChainId.MAINNET,
-            ChainId.MATIC,
-            ChainId.FANTOM,
-            ChainId.AVALANCHE,
-            ChainId.ARBITRUM,
-            ChainId.MOONRIVER,
-            ChainId.HARMONY,
-            ChainId.XDAI,
-            ChainId.OPTIMISM,
-            ChainId.BSC,
-            ChainId.MOONBEAM,
-            ChainId.METIS,
-        ]
+        const chainIds = chainId
+            ? [chainId]
+            : [
+                  ChainId.MAINNET,
+                  ChainId.MATIC,
+                  ChainId.FANTOM,
+                  ChainId.AVALANCHE,
+                  ChainId.ARBITRUM,
+                  ChainId.MOONRIVER,
+                  ChainId.HARMONY,
+                  ChainId.XDAI,
+                  ChainId.OPTIMISM,
+                  ChainId.BSC,
+                  ChainId.MOONBEAM,
+                  ChainId.METIS,
+              ]
         const vaultInfoPromises = chainIds
             .flatMap((chainId) => {
                 const qiDaoContracts: (COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2)[] = []
@@ -151,8 +154,13 @@ const Routes: React.FC = () => {
     const dataProvider = fakeDataProvider({
         vaults: [],
     })
+
+    const qps = useQueryParams()
+    const { chainId } = qps
+    const cId: ChainId | null = chainId ? (parseInt(chainId) as ChainId) : null
+
     const notify = useNotify()
-    useLayoutEffect(() => fetchVaults(dataProvider, notify), [dataProvider, notify])
+    useLayoutEffect(() => fetchVaults(dataProvider, notify, cId), [dataProvider, notify])
 
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
