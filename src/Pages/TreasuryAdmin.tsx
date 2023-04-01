@@ -217,7 +217,7 @@ const fetchVaultZeroes = async (
         return vaultContract.ownerOf(VAULT_IDX)
     })
     const vaultOwners = await multicall<string>(chainId, vaultOwnerCalls)
-    return collaterals.map((c, i) => {
+    const map = collaterals.map((c, i) => {
         const depositedCollateralAmount = (depositedCollaterals[i] as unknown as number) / 10 ** c.token.decimals
         const collateralValue = (collateralValues[i] as unknown as number) / 10 ** 8
         const owner = vaultOwners[i]
@@ -230,6 +230,8 @@ const fetchVaultZeroes = async (
             vaultIdx: VAULT_IDX,
         }
     })
+    console.log({ map })
+    return map
 }
 
 const isBeefyZappable = (vaultAddress: string) => {
@@ -260,14 +262,18 @@ const TreasuryAdmin = () => {
     const [vaults, setVaults] = useState<TreasuryManagementVaultData[]>([])
     useEffect(() => {
         const fetchAllChainsVaultZeros = async () => {
-            const vaultZeros = await Promise.all(
-                Object.keys(COLLATERALS).map((cId) => {
-                    const chainId = parseInt(cId) as ChainId
-                    if (!isEmpty(COLLATERALS[chainId])) return fetchVaultZeroes(chainId, COLLATERALS[chainId])
-                    else return []
-                })
-            )
-            setVaults(vaultZeros.flat())
+            try {
+                const vaultZeros = await Promise.allSettled(
+                    Object.keys(COLLATERALS).map((cId) => {
+                        const chainId = parseInt(cId) as ChainId
+                        if (!isEmpty(COLLATERALS[chainId])) return fetchVaultZeroes(chainId, COLLATERALS[chainId])
+                        else return []
+                    })
+                )
+                setVaults(vaultZeros.flatMap((v) => (v.status === 'fulfilled' ? v.value : [])))
+            } catch (e) {
+                console.error('shit blew up', e)
+            }
         }
         void fetchAllChainsVaultZeros()
     }, [])
@@ -393,6 +399,7 @@ const TreasuryAdmin = () => {
     const listContext = useList({
         data: vaults?.filter((v) => v.chainId === selectedChainId) || [],
     })
+    console.log(listContext.data)
     return (
         <div>
             <>

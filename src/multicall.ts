@@ -11,7 +11,6 @@ const MULTICALL_CONCURRENCY = 5
 
 async function setupAndInitMulticall(chainId: ChainId) {
     // setMulticallAddress(chainId, MULTICALL_NETWORKS[chainId] || "");
-    console.log(`Setting up multicall for Chain ${chainId}`)
     let provider = PROVIDERS[chainId]
     if (provider && !ethcallProvider[chainId]) {
         const callProvider = new Provider()
