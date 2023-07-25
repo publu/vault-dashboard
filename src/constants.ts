@@ -35,6 +35,9 @@ export const ChainName: { [chainId in ChainId]: string } = {
     [ChainId.AURORA]: 'Aurora',
     [ChainId.BOBA]: 'Boba',
     [ChainId.CUBE]: 'Cube',
+    [ChainId.DOGECHAIN]: 'Dogechain',
+    [ChainId.ZKEVM]: 'ZK-EVM',
+    [ChainId.CANTO]: 'Canto',
 }
 
 export const maiAddresses: { [index: string]: any } = {
@@ -94,6 +97,7 @@ export const RPCS: { [chainId in ChainId]: string } = {
     [ChainId.MATIC_TESTNET]: 'https://rpc-mumbai.maticvigil.com',
     [ChainId.XDAI]: 'https://rpc.ankr.com/gnosis',
     [ChainId.BSC]: 'https://bsc.publicnode.com',
+    [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-2-s1.bnbchain.org:8545',
     [ChainId.MOONBASE]: 'https://rpc.testnet.moonbeam.network',
     [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
     [ChainId.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
@@ -115,6 +119,9 @@ export const RPCS: { [chainId in ChainId]: string } = {
     [ChainId.AURORA]: 'https://mainnet.aurora.dev',
     [ChainId.BOBA]: 'https://mainnet.boba.network',
     [ChainId.CUBE]: 'https://http-mainnet.cube.network',
+    [ChainId.DOGECHAIN]: 'https://rpc.dogechain.dog',
+    [ChainId.ZKEVM]: 'https://zkevm-rpc.com',
+    [ChainId.CANTO]: 'https://canto.slingshot.finance',
 }
 
 const SKIP_RPCS = [ChainId.GÖRLI, ChainId.KOVAN, ChainId.HARMONY_TESTNET, ChainId.HECO, ChainId.HECO_TESTNET, ChainId.FANTOM_TESTNET]
