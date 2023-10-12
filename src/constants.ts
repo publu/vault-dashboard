@@ -38,6 +38,7 @@ export const ChainName: { [chainId in ChainId]: string } = {
     [ChainId.DOGECHAIN]: 'Dogechain',
     [ChainId.ZKEVM]: 'ZK-EVM',
     [ChainId.CANTO]: 'Canto',
+    [ChainId.BASE]: 'Base',
 }
 
 export const maiAddresses: { [index: string]: any } = {
@@ -58,6 +59,7 @@ export const maiAddresses: { [index: string]: any } = {
     IOTEX: '0x3F56e0c36d275367b8C502090EDF38289b3dEa0d',
     OPTIMISM: '0xdFA46478F9e5EA86d57387849598dbFB2e964b02',
     MOONBEAM: '0xdfa46478f9e5ea86d57387849598dbfb2e964b02',
+    BASE: '0xbf1aeA8670D2528E08334083616dD9C5F3B087aE',
 }
 
 export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
@@ -84,44 +86,47 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
     [ChainId.CRONOS]: '0xA25da25BD11A26F1dd4ea195948305fb7C8cA102',
     [ChainId.OPTIMISM]: '0x142e2feac30d7fc3b61f9ee85fccad8e560154cc',
     [ChainId.METIS]: '0xc39aBB6c4451089dE48Cffb013c39d3110530e5C',
+    [ChainId.BASE]: '0xcA11bde05977b3631167028862bE2a173976CA11',
 }
 
 export const RPCS: { [chainId in ChainId]: string } = {
-    [ChainId.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
-    [ChainId.MAINNET]: 'https://rpc.ankr.com/eth',
-    [ChainId.GÖRLI]: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161\n',
-    [ChainId.KOVAN]: 'https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    [ChainId.ARBITRUM]: 'https://arbitrum.blockpi.network/v1/rpc/public',
+    [ChainId.MAINNET]: 'https://eth.llamarpc.com',
+    [ChainId.GÖRLI]: 'https://rpc.ankr.com/eth_goerli',
+    [ChainId.KOVAN]: 'https://rpc.ankr.com/eth_kovan',
     [ChainId.FANTOM]: 'https://rpc.ftm.tools/',
-    [ChainId.FANTOM_TESTNET]: 'https://rpc.testnet.fantom.network',
-    [ChainId.MATIC]: 'https://polygon-rpc.com',
-    [ChainId.MATIC_TESTNET]: 'https://rpc-mumbai.maticvigil.com',
-    [ChainId.XDAI]: 'https://rpc.ankr.com/gnosis',
-    [ChainId.BSC]: 'https://bsc.publicnode.com',
-    [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-2-s1.bnbchain.org:8545',
+    [ChainId.FANTOM_TESTNET]: 'https://rpc.ankr.com/fantom_testnet',
+    [ChainId.MATIC]: 'https://polygon.llamarpc.com',
+    [ChainId.MATIC_TESTNET]: 'https://rpc.ankr.com/polygon_mumbai',
+    [ChainId.XDAI]: 'https://gnosis.oat.farm',
+    [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
+    [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-2-s3.binance.org:8545',
     [ChainId.MOONBASE]: 'https://rpc.testnet.moonbeam.network',
-    [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
+    [ChainId.AVALANCHE]: 'https://avax.meowrpc.com',
     [ChainId.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
     [ChainId.HECO]: 'https://http-mainnet.hecochain.com',
     [ChainId.HECO_TESTNET]: 'https://http-testnet.hecochain.com',
-    [ChainId.HARMONY]: 'https://rpc.ankr.com/harmony',
-    [ChainId.HARMONY_TESTNET]: 'https://explorer.pops.one',
-    [ChainId.MOONRIVER]: 'https://rpc.moonriver.moonbeam.network',
+    [ChainId.HARMONY]: 'https://api.s0.t.hmny.io',
+    [ChainId.HARMONY_TESTNET]: 'https://api.s0.b.hmny.io',
+    [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
     [ChainId.CRONOS]: 'https://evm-cronos.crypto.org',
-    [ChainId.OPTIMISM]: 'https://rpc.ankr.com/optimism',
-    [ChainId.SYSCOIN]: 'https://rpc.ankr.com/syscoin',
+    [ChainId.OPTIMISM]: 'https://optimism.llamarpc.com',
+    [ChainId.SYSCOIN]: 'https://syscoin-evm.publicnode.com',
     [ChainId.METIS]: 'https://andromeda.metis.io/?owner=1088',
-    [ChainId.MOONBEAM]: 'https://rpc.ankr.com/moonbeam',
+    [ChainId.MOONBEAM]: 'https://moonbeam.unitedbloc.com:3000',
     [ChainId.MILKOMEDA]: 'https://rpc-mainnet-cardano-evm.c1.milkomeda.com',
     [ChainId.KAVA]: 'https://evm.kava.io',
-    [ChainId.IOTEX]: 'https://rpc.ankr.com/iotex',
-    [ChainId.KLAYTN]: 'https://public-node-api.klaytnapi.com/v1/cypress',
+    [ChainId.IOTEX]: 'https://babel-api.mainnet.iotex.io',
+    [ChainId.KLAYTN]: 'https://public-en-cypress.klaytn.net',
     [ChainId.CELO]: 'https://forno.celo.org',
     [ChainId.AURORA]: 'https://mainnet.aurora.dev',
     [ChainId.BOBA]: 'https://mainnet.boba.network',
     [ChainId.CUBE]: 'https://http-mainnet.cube.network',
+    [ChainId.KAVA]: 'https://evm2.kava.io',
+    [ChainId.CANTO]: 'https://canto.slingshot.finance',
     [ChainId.DOGECHAIN]: 'https://rpc.dogechain.dog',
     [ChainId.ZKEVM]: 'https://zkevm-rpc.com',
-    [ChainId.CANTO]: 'https://canto.slingshot.finance',
+    [ChainId.BASE]: 'https://1rpc.io/base',
 }
 
 const SKIP_RPCS = [ChainId.GÖRLI, ChainId.KOVAN, ChainId.HARMONY_TESTNET, ChainId.HECO, ChainId.HECO_TESTNET, ChainId.FANTOM_TESTNET]
@@ -132,6 +137,7 @@ export const PROVIDERS = Object.entries(RPCS).reduce((previousValue, currentValu
     if (!SKIP_RPCS.includes(chainId)) {
         previousValue[chainId] = new JsonRpcProvider(curRpc)
     }
+
     return previousValue
 }, {} as { [chainId in ChainId]?: JsonRpcProvider })
 
@@ -147,4 +153,5 @@ export const MAIFACTORIES: { [chainId in ChainId]?: any } = {
     [ChainId.OPTIMISM]: QiStablecoin__factory,
     [ChainId.BSC]: QiStablecoin__factory,
     [ChainId.METIS]: EditableERC20__factory,
+    [ChainId.BASE]: QiStablecoin__factory,
 }

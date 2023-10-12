@@ -10,12 +10,12 @@ const ethcall2Queue: { [chainId in ChainId]?: PQueue } = {}
 const MULTICALL_CONCURRENCY = 5
 
 async function setupAndInitMulticall(chainId: ChainId) {
-    // setMulticallAddress(chainId, MULTICALL_NETWORKS[chainId] || "");
     let provider = PROVIDERS[chainId]
+
     if (provider && !ethcallProvider[chainId]) {
-        const callProvider = new Provider()
-        await callProvider.init(provider)
-        ethcallProvider[chainId] = callProvider
+        await provider.getBlockNumber()
+        ethcallProvider[chainId] = new Provider(chainId, provider)
+        console.log(`Initialized ethcall provider for chain ${chainId}`)
         ethcallQueue[chainId] = new PQueue({ concurrency: MULTICALL_CONCURRENCY })
         ethcall2Queue[chainId] = new PQueue({ concurrency: MULTICALL_CONCURRENCY })
     }
@@ -31,10 +31,16 @@ export async function init() {
                 return !EXCLUDE_LIST.includes(i)
             })
             .map(async (cId) => {
-                return await setupAndInitMulticall(cId as ChainId)
+                try {
+                    return await setupAndInitMulticall(cId as ChainId)
+                } catch (e) {
+                    console.warn(`Failed to init multicall for chain ${cId}`)
+                }
             })
     )
 }
+
+const batchSize = 200
 
 export async function multicall<T>(chainId: ChainId, calls: any[]) {
     const callProvider = ethcallProvider[chainId]
@@ -42,7 +48,7 @@ export async function multicall<T>(chainId: ChainId, calls: any[]) {
     if (callProvider) {
         return (
             await Promise.all(
-                _.chunk(calls, 450).map((cs) => {
+                _.chunk(calls, batchSize).map((cs) => {
                     return queue?.add(() => callProvider.all<T>(cs))
                 })
             )
@@ -58,7 +64,7 @@ export async function multicall2<T>(chainId: ChainId, calls: any[]) {
     if (callProvider) {
         return (
             await Promise.all(
-                _.chunk(calls, 450).map((cs) => {
+                _.chunk(calls, batchSize).map((cs) => {
                     return queue?.add(() => callProvider.tryAll<T>(cs))
                 })
             )
@@ -73,7 +79,7 @@ export async function multicall3<T>(chainId: ChainId, calls: any[]) {
     if (callProvider) {
         return (
             await Promise.all(
-                _.chunk(calls, 450).map((cs) => {
+                _.chunk(calls, batchSize).map((cs) => {
                     return queue?.add(() =>
                         callProvider.tryEach<T>(
                             cs,
