@@ -1238,10 +1238,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
 
-"@qidao/sdk@^5.2.3":
-  version "5.2.6"
-  resolved "https://registry.yarnpkg.com/@qidao/sdk/-/sdk-5.2.6.tgz#8c58ace37f86ffc3b36336c9f36eb9acf348427c"
-  integrity sha512-Ch/rCtN8GRIo7NDhb9JtGk9ONi/gJgdqn2+KH/VDp1Cc+slr6lC0CHhD1oUnaG8UR/q3bWe4sk0dEZJNsRfvWA==
+"@qidao/sdk@^5.2.13":
+  version "5.2.13"
+  resolved "https://registry.yarnpkg.com/@qidao/sdk/-/sdk-5.2.13.tgz#f9768f5a6bdafbbf7212496a1de908129a96a07e"
+  integrity sha512-THWkOCX1JEtQIvZ4rQkGL8ztduDd9iWJOw8F4qQpGJSBl8UW/0A0ytFpkcKbqxhZINyIA0lGQBSnJRAPI4VUDg==
   dependencies:
     big.js "5.2.2"
     decimal.js-light "2.5.1"
@@ -1590,9 +1590,9 @@
   integrity sha512-6u+36Dj3aDzhfBVUf/mfmc92OEdzQ2kx2jcXGdigfl70E/neV21ZHE6UCz4MDzTRcVqGAM27fk+DLXvyDsn3Jw==
 
 "@types/node@^18.6.3":
-  version "18.11.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.9.tgz#02d013de7058cea16d36168ef2fc653464cfbad4"
-  integrity sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==
+  version "18.18.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.18.4.tgz#519fef47a13cf869be290c20fc6ae9b7fe887aa7"
+  integrity sha512-t3rNFBgJRugIhackit2mVcLfF6IRc0JE4oeizPQL8Zrm8n2WY/0wOdpOPhdtG0V9Q2TlW/axbF1MJ6z+Yj/kKQ==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -3058,10 +3058,10 @@ estree-walker@^2.0.2:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
 
-ethcall@4.8.10:
-  version "4.8.10"
-  resolved "https://registry.yarnpkg.com/ethcall/-/ethcall-4.8.10.tgz#72104a84faf967afe9092482095e844b092acd79"
-  integrity sha512-sVaNzBvAeLdAMyO9kIs/C8XykJSXLGC3MicqL+JrExCtbIyEF5WGsNYFbDhC3kUAMqFVR3GETPTVo3WT9cbUqQ==
+ethcall@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/ethcall/-/ethcall-5.0.1.tgz#7a0c41245515a30be63218c518bcaf6e5dd2dc8e"
+  integrity sha512-xolhtk8lZEAsmtDpK4aXq0CRUo1PoWMa4ofyBfB6hw5gdJbWheQOjh7L257RL9C6/gXuLnELE7goKHBbqGBcCQ==
   dependencies:
     "@ethersproject/abi" "^5.0.0"
     "@ethersproject/bytes" "^5.0.0"
