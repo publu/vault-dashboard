@@ -90,13 +90,13 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
 }
 
 export const RPCS: { [chainId in ChainId]: string } = {
-    [ChainId.ARBITRUM]: 'https://arbitrum.blockpi.network/v1/rpc/public',
+    [ChainId.ARBITRUM]: 'https://arbitrum-mainnet.infura.io/v3/1xN2l15dFM3oVqni4sTn07E3iCa',
     [ChainId.MAINNET]: 'https://eth.llamarpc.com',
     [ChainId.GÖRLI]: 'https://rpc.ankr.com/eth_goerli',
     [ChainId.KOVAN]: 'https://rpc.ankr.com/eth_kovan',
     [ChainId.FANTOM]: 'https://rpc.ftm.tools/',
     [ChainId.FANTOM_TESTNET]: 'https://rpc.ankr.com/fantom_testnet',
-    [ChainId.MATIC]: 'https://polygon.llamarpc.com',
+    [ChainId.MATIC]: 'https://polygon-mainnet.infura.io/v3/1xN2l15dFM3oVqni4sTn07E3iCa',
     [ChainId.MATIC_TESTNET]: 'https://rpc.ankr.com/polygon_mumbai',
     [ChainId.XDAI]: 'https://gnosis.oat.farm',
     [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
