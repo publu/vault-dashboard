@@ -9,6 +9,7 @@ import {
     COLLATERAL,
     COLLATERAL_V2,
     COLLATERALS,
+    DISCRIMINATOR_TO_ABI,
     Erc20Stablecoin,
     FTM_ZAPPER_ADDRESS,
     GAUGE_VALID_COLLATERAL,
@@ -189,13 +190,14 @@ const fetchVaultZeroes = async (
 ) => {
     await init()
     const VAULT_IDX = 0
-    //TODO make the ordering link between collaterals and calls more explict
     const depositedCollateralCalls = collaterals.map((c) => {
-        const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any)
+        const abi = DISCRIMINATOR_TO_ABI[c.discriminator]
+        const vaultContract = new Contract(c.vaultAddress, abi as any)
         return vaultContract.vaultCollateral(VAULT_IDX)
     })
     const collateralValueCalls = collaterals.map((c) => {
-        const vaultContract = new Contract(c.vaultAddress, c.contractAbi as any)
+        const abi = DISCRIMINATOR_TO_ABI[c.discriminator]
+        const vaultContract = new Contract(c.vaultAddress, abi as any)
         return vaultContract.getEthPriceSource()
     })
 
@@ -209,7 +211,8 @@ const fetchVaultZeroes = async (
         let vaultAddress: string
         if (c.vaultAddress !== OG_MATIC_VAULT) {
             vaultAddress = c.vaultAddress
-            vaultContract = new Contract(vaultAddress, c.contractAbi as any)
+            const abi = DISCRIMINATOR_TO_ABI[c.discriminator]
+            vaultContract = new Contract(vaultAddress, abi as any)
         } else {
             vaultAddress = '0x6AF1d9376a7060488558cfB443939eD67Bb9b48d'
             vaultContract = new Contract(vaultAddress, Erc20QiStablecoin__factory.abi as any)

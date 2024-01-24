@@ -1,4 +1,12 @@
-import { ChainId, COLLATERAL, COLLATERAL_V2, COLLATERALS, GAUGE_VALID_COLLATERAL, GAUGE_VALID_COLLATERAL_V2 } from '@qidao/sdk'
+import {
+    ChainId,
+    COLLATERAL,
+    COLLATERAL_V2,
+    COLLATERALS,
+    DISCRIMINATOR_TO_ABI,
+    GAUGE_VALID_COLLATERAL,
+    GAUGE_VALID_COLLATERAL_V2,
+} from '@qidao/sdk'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -119,7 +127,8 @@ const fetchVaults = (
 function generateEmptyVault(c: COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2) {
     const vaultChainName = ChainName[c.chainId]
     const vaultLink = 'https://app.mai.finance/vaults/' + c.chainId.toString() + '/' + c.shortName + '/0'
-    const contract = new Contract(c.vaultAddress, c.contractAbi as any)
+    const abi = DISCRIMINATOR_TO_ABI[c.discriminator]
+    const contract = new Contract(c.vaultAddress, abi as any)
     return {
         ...c,
         id: `${c.chainId}-${c.token.symbol}-${0}`,

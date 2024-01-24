@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { ChainId, COLLATERAL, COLLATERAL_V2, GAUGE_VALID_COLLATERAL, GAUGE_VALID_COLLATERAL_V2 } from '@qidao/sdk'
+import { ChainId, COLLATERAL, COLLATERAL_V2, DISCRIMINATOR_TO_ABI, GAUGE_VALID_COLLATERAL, GAUGE_VALID_COLLATERAL_V2 } from '@qidao/sdk'
 import { Contract } from 'ethcall'
 import _ from 'lodash'
 import { ChainName, RPCS } from './constants'
@@ -24,13 +24,14 @@ export interface VaultInfo extends COLLATERAL {
 
 export interface GaugeValidVaultInfo extends VaultInfo {}
 
-export interface VaultInfoV2 extends Omit<VaultInfo, 'version' | 'connect' | 'contractAbi'>, COLLATERAL_V2 {}
+export interface VaultInfoV2 extends Omit<VaultInfo, 'version' | 'connect' | 'discriminator'>, COLLATERAL_V2 {}
 
 export interface GaugeValidVaultInfoV2 extends VaultInfoV2 {}
 
 export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2 | GAUGE_VALID_COLLATERAL | GAUGE_VALID_COLLATERAL_V2) {
     const ethersProvider = new JsonRpcProvider(RPCS[collateral.chainId])
-    const vaultContract = new Contract(collateral.vaultAddress, collateral.contractAbi as any)
+    const abi = DISCRIMINATOR_TO_ABI[collateral.discriminator]
+    const vaultContract = new Contract(collateral.vaultAddress, abi as any)
     const totalSupplyCall = vaultContract.vaultCount() // because totalSupply isn't all-encompassing.
     const collateralPriceCall = vaultContract.getEthPriceSource()
     const collateralAddressCall = vaultContract.collateral()
@@ -51,7 +52,8 @@ export async function fetchVaultInfo(collateral: COLLATERAL | COLLATERAL_V2 | GA
     const existsCalls = _.range(limitToFetch).map((i) => vaultContract.exists(i))
 
     const vaultsExistCheck: any[] = await multicall(collateral.chainId, existsCalls)
-    const vaultsToFetch = _.range(limitToFetch).filter((i) => vaultsExistCheck[i])
+
+    const vaultsToFetch = limitToFetch ? _.range(limitToFetch).filter((i) => vaultsExistCheck[i]) : []
 
     const collateralCalls = vaultsToFetch.map((i) => vaultContract.vaultCollateral(i))
     const collateralAmounts = await multicall(collateral.chainId, collateralCalls)

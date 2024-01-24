@@ -39,6 +39,8 @@ export const ChainName: { [chainId in ChainId]: string } = {
     [ChainId.ZKEVM]: 'ZK-EVM',
     [ChainId.CANTO]: 'Canto',
     [ChainId.BASE]: 'Base',
+    [ChainId.LINEA]: 'Linea',
+    [ChainId.SCROLL]: 'Scroll',
 }
 
 export const maiAddresses: { [index: string]: any } = {
@@ -90,7 +92,7 @@ export const MULTICALL_NETWORKS: { [chainId in ChainId]?: string } = {
 }
 
 export const RPCS: { [chainId in ChainId]: string } = {
-    [ChainId.ARBITRUM]: 'https://arbitrum-mainnet.infura.io/v3/1xN2l15dFM3oVqni4sTn07E3iCa',
+    [ChainId.ARBITRUM]: 'https://arbitrum.blockpi.network/v1/rpc/public',
     [ChainId.MAINNET]: 'https://eth.llamarpc.com',
     [ChainId.GÖRLI]: 'https://rpc.ankr.com/eth_goerli',
     [ChainId.KOVAN]: 'https://rpc.ankr.com/eth_kovan',
@@ -100,15 +102,15 @@ export const RPCS: { [chainId in ChainId]: string } = {
     [ChainId.MATIC_TESTNET]: 'https://rpc.ankr.com/polygon_mumbai',
     [ChainId.XDAI]: 'https://gnosis.oat.farm',
     [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
-    [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-2-s3.binance.org:8545',
+    [ChainId.BSC_TESTNET]: 'https://bsc-testnet.publicnode.com',
     [ChainId.MOONBASE]: 'https://rpc.testnet.moonbeam.network',
     [ChainId.AVALANCHE]: 'https://avax.meowrpc.com',
     [ChainId.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
     [ChainId.HECO]: 'https://http-mainnet.hecochain.com',
     [ChainId.HECO_TESTNET]: 'https://http-testnet.hecochain.com',
-    [ChainId.HARMONY]: 'https://api.s0.t.hmny.io',
+    [ChainId.HARMONY]: 'https://api.harmony.one',
     [ChainId.HARMONY_TESTNET]: 'https://api.s0.b.hmny.io',
-    [ChainId.MOONRIVER]: 'https://rpc.api.moonriver.moonbeam.network',
+    [ChainId.MOONRIVER]: 'https://moonriver.unitedbloc.com:2000',
     [ChainId.CRONOS]: 'https://evm-cronos.crypto.org',
     [ChainId.OPTIMISM]: 'https://optimism.llamarpc.com',
     [ChainId.SYSCOIN]: 'https://syscoin-evm.publicnode.com',
@@ -125,8 +127,11 @@ export const RPCS: { [chainId in ChainId]: string } = {
     [ChainId.KAVA]: 'https://evm2.kava.io',
     [ChainId.CANTO]: 'https://canto.slingshot.finance',
     [ChainId.DOGECHAIN]: 'https://rpc.dogechain.dog',
+    [ChainId.ZKEVM]: 'https://rpc.ankr.com/polygon_zkevm',
+    [ChainId.BASE]: 'https://mainnet.base.org',
+    [ChainId.LINEA]: 'https://rpc.linea.build',
     [ChainId.ZKEVM]: 'https://zkevm-rpc.com',
-    [ChainId.BASE]: 'https://1rpc.io/base',
+    [ChainId.SCROLL]: 'https://rpc.scroll.io',
 }
 
 const SKIP_RPCS = [ChainId.GÖRLI, ChainId.KOVAN, ChainId.HARMONY_TESTNET, ChainId.HECO, ChainId.HECO_TESTNET, ChainId.FANTOM_TESTNET]
